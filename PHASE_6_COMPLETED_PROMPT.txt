@@ -1,0 +1,960 @@
+You are working on Tezoro, an existing standalone React/Vite + Express crypto market dashboard app.
+
+This prompt describes the current completed state after Phase 1, Phase 1.5, Phase 2, Phase 3, Phase 4, Phase 5, and Phase 6.
+Use this as the baseline for the next phase of development.
+
+Project Location:
+- D:\W\crypto-market-dashboard
+
+Brand:
+- App name: Tezoro
+- Tagline: Crypto Intelligence
+- Browser title: Tezoro | Crypto Intelligence
+
+Core Product:
+Tezoro is a premium crypto market intelligence dashboard. It shows a market outlook, calculated signal score, live/fallback crypto pricing, sentiment context, premium/exchange demand signal, historical analytics, market structure, price history charts, performance comparison, deterministic AI narrative intelligence, technical analysis, key price zones, key levels, quick takeaways, provider diagnostics, signal confidence, and educational market notes for selected crypto assets.
+
+Supported Cryptos:
+- BTC
+- ETH
+- AVAX
+- DOGE
+- XRP
+- LTC
+
+Default Crypto:
+- BTC
+
+Important Symbol Rule:
+- LTC must remain the last crypto selector option.
+
+Current Frontend Tech:
+- React 18
+- Vite 5
+- JavaScript only
+- JSX only
+- Bootstrap
+- Reactstrap
+- Axios
+- Recharts
+- Custom CSS in src/styles/app.css
+
+Current Backend Tech:
+- Node.js 18+
+- Express 4
+- Axios
+- dotenv
+- helmet
+- cors
+- morgan
+- nodemon for development
+
+Important Constraints:
+- JavaScript only.
+- JSX only.
+- Do not introduce TypeScript.
+- Do not create .ts or .tsx files.
+- Do not add tsconfig.
+- Do not add authentication unless explicitly requested.
+- Do not add routing unless explicitly requested.
+- Do not add MongoDB unless explicitly requested.
+- Do not add alerts unless explicitly requested.
+- Do not add portfolio tracking unless explicitly requested.
+- Do not add chatbot functionality unless explicitly requested.
+- Do not remove local fallback data.
+- Do not break frontend fallback behavior.
+- Do not break BTC/ETH/AVAX/DOGE/XRP/LTC switching.
+- Keep LTC as the last crypto selector option.
+- Keep API response shape compatible with the existing frontend.
+- Keep dashboard educational/informational, not financial advice.
+
+Current Frontend Structure:
+crypto-market-dashboard/
+  package.json
+  index.html
+  vite.config.js
+  .env.example
+  README.md
+  PHASE_6_COMPLETED_PROMPT.txt
+  src/
+    main.jsx
+    App.jsx
+    data/
+      cryptoDashboardData.js
+    services/
+      marketApi.js
+    components/
+      CryptoSelector.jsx
+      CryptoMarketDashboard.jsx
+      CurrentSnapshot.jsx
+      HistoricalPerformanceCards.jsx
+      MarketStructurePanel.jsx
+      TechnicalAnalysisCards.jsx
+      KeyPriceZonesChart.jsx
+      PriceHistoryChart.jsx
+      AIIntelligenceCenter.jsx
+      KeyLevelsTable.jsx
+      PerformanceComparison.jsx
+      QuickTakeaways.jsx
+      MarketSignalPanel.jsx
+      MiniSparkline.jsx
+    assets/
+      tezoro-logo.png
+      tezoro-wordmark.svg
+    styles/
+      app.css
+
+Current Backend Structure:
+crypto-market-dashboard/
+  backend/
+    package.json
+    package-lock.json
+    server.js
+    .env.example
+    src/
+      app.js
+      routes/
+        marketRoutes.js
+      controllers/
+        marketController.js
+      services/
+        marketDataService.js
+        cacheService.js
+        premiumService.js
+        sentimentService.js
+      engine/
+        outlookEngine.js
+        fearGreedEngine.js
+        technicalAnalysisEngine.js
+        supportResistanceEngine.js
+        signalScoreEngine.js
+        signalConfidenceEngine.js
+        historicalAnalyticsEngine.js
+        marketRegimeEngine.js
+        performanceComparisonEngine.js
+        aiNarrativeEngine.js
+      data/
+        fallbackMarketData.js
+
+Current Dashboard Layout:
+1. Brand Header
+2. Market Outlook Card
+3. Calculated Market Signal Card
+4. Current Snapshot
+5. Historical Performance
+6. Market Structure
+7. Technical Analysis
+8. Key Price Zones
+9. Price History Chart
+10. AI Intelligence Center
+11. Key Levels & Outlook
+12. Performance Comparison
+13. Quick Takeaways
+14. Disclaimer
+
+Preserve this layout unless explicitly requested.
+Do not redesign the dashboard.
+Do not replace the Tezoro brand header.
+
+Completed Features:
+
+1. Brand Header
+- Tezoro logo image.
+- Custom Tezoro SVG wordmark.
+- Premium fintech styling.
+- Responsive desktop/mobile layout.
+- Mobile wordmark size was increased slightly for better balance.
+- Theme switcher appears in the header using Reactstrap pill badges.
+
+2. Theme Switcher
+- Theme options:
+  - Dark
+  - Light
+  - High Contrast
+- Default theme is Dark.
+- Theme state is local React state in CryptoMarketDashboard.jsx.
+- Theme is applied through document.documentElement data-theme attribute.
+- CSS variables drive theme styling.
+- Light theme contrast was refined for hero text, date/status pills, inactive crypto buttons, refresh button, signal labels, snapshot labels, and wordmark visibility.
+- Phase 4, Phase 5, and Phase 6 UI additions support Dark, Light, and High Contrast themes.
+
+3. Crypto Selector
+- Supported selector order:
+  - BTC
+  - ETH
+  - AVAX
+  - DOGE
+  - XRP
+  - LTC
+- BTC selected by default.
+- LTC is last and must remain last.
+- Clicking a crypto fetches backend data and updates the dashboard.
+- If the backend fails, the frontend uses local fallback data.
+- Crypto selector sits in the same control area as live/fallback status, confidence, last updated, and Refresh.
+- Desktop: status/actions sit left and crypto selector sits right.
+- Mobile: status/actions use a compact two-column grid and crypto buttons wrap below.
+- Mobile and iPad/tablet Market Outlook spacing was tightened to reduce card height.
+
+4. Current Snapshot
+- Three cards:
+  - Current Price
+  - Premium Index
+  - Fear & Greed Index
+- Each card shows:
+  - label
+  - value
+  - description
+  - bias badge
+  - mini sparkline/trend context
+- Premium card shows source indicator:
+  - Live Calculation
+  - Fallback Estimate
+
+5. Historical Performance
+Frontend file:
+src/components/HistoricalPerformanceCards.jsx
+
+Backend file:
+backend/src/engine/historicalAnalyticsEngine.js
+
+- Renders compact cards for:
+  - 24H
+  - 7D
+  - 30D
+  - 90D
+  - YTD
+- Positive values use green styling.
+- Negative values use red styling.
+- Missing/flat values use neutral styling.
+- Hides safely if historicalPerformance is missing.
+
+API output shape:
+historicalPerformance: {
+  change24h,
+  change7d,
+  change30d,
+  change90d,
+  changeYtd
+}
+
+6. Market Structure
+Frontend file:
+src/components/MarketStructurePanel.jsx
+
+Backend file:
+backend/src/engine/marketRegimeEngine.js
+
+- Classifies market structure using trend, moving averages, momentum, volatility, and recent price structure.
+- Possible regimes:
+  - Accumulation
+  - Expansion
+  - Trend
+  - Distribution
+  - Correction
+  - Capitulation
+  - Neutral
+
+API output shape:
+marketStructure: {
+  trend,
+  regime,
+  priceVsSma20,
+  priceVsSma50,
+  priceVsSma200,
+  volatility,
+  momentum,
+  summary
+}
+
+7. Price History Chart
+Frontend file:
+src/components/PriceHistoryChart.jsx
+
+Backend support:
+backend/src/engine/historicalAnalyticsEngine.js
+backend/src/services/marketDataService.js
+
+- Uses Recharts.
+- Renders a compact responsive line chart.
+- Range buttons:
+  - 7D
+  - 30D
+  - 90D
+  - 1Y
+- Default range is 30D.
+- Uses CSS variables for theme support.
+- Has a clean tooltip.
+- Shows graceful empty state if a range is unavailable.
+- If 1Y data is unavailable, backend returns the best available fallback/range data.
+
+API output shape:
+priceHistory: {
+  ranges: ["7D", "30D", "90D", "1Y"],
+  defaultRange: "30D",
+  series: {
+    "7D": [],
+    "30D": [],
+    "90D": [],
+    "1Y": []
+  }
+}
+
+Each point:
+{
+  date: "2026-05-28",
+  price: 73735
+}
+
+8. Performance Comparison
+Frontend file:
+src/components/PerformanceComparison.jsx
+
+Backend file:
+backend/src/engine/performanceComparisonEngine.js
+
+- Compares supported cryptos using available chart data.
+- Shows 7D and 30D performance.
+- Highlights selected crypto.
+- Display order:
+  - BTC
+  - ETH
+  - AVAX
+  - DOGE
+  - XRP
+  - LTC
+- LTC remains last.
+
+API output shape:
+comparisonPerformance: [
+  {
+    symbol: "BTC",
+    name: "Bitcoin",
+    change7d: 2.1,
+    change30d: 8.5,
+    selected: true
+  }
+]
+
+9. AI Narrative Intelligence
+Backend file:
+backend/src/engine/aiNarrativeEngine.js
+
+Frontend file:
+src/components/AIIntelligenceCenter.jsx
+
+Important:
+- No external LLM APIs are called.
+- Narrative generation is deterministic and rule-based.
+- It uses existing dashboard data:
+  - marketSignal
+  - signalConfidence
+  - fearGreedIndex
+  - historicalPerformance
+  - marketStructure
+  - technicalAnalysis
+  - premiumIndex
+  - keyPriceZones
+
+Generated fields:
+- intelligenceScore
+- aiOutlook
+- riskAssessment
+- opportunityAssessment
+- recommendedAction
+
+Intelligence Score output:
+intelligenceScore: {
+  score,
+  label
+}
+
+Intelligence score labels:
+- 0-24: Weak Setup
+- 25-49: Caution
+- 50-69: Neutral
+- 70-84: Strong Opportunity
+- 85-100: Exceptional Setup
+
+AI Outlook output:
+aiOutlook: {
+  headline,
+  summary,
+  bias
+}
+
+AI Outlook bias values:
+- buy
+- sell
+- neutral
+- caution
+
+Risk Assessment output:
+riskAssessment: {
+  level,
+  summary,
+  riskFactors
+}
+
+Opportunity Assessment output:
+opportunityAssessment: {
+  level,
+  summary,
+  opportunities
+}
+
+Recommended Action output:
+recommendedAction: {
+  action,
+  summary
+}
+
+Recommended actions:
+- Accumulate Gradually
+- Hold
+- Wait For Confirmation
+- Reduce Risk
+- Neutral Stance
+
+10. AI Intelligence Center UI
+Frontend file:
+src/components/AIIntelligenceCenter.jsx
+
+Placement:
+- Inserted between Price History Chart and Key Levels & Outlook.
+
+Renders:
+- Intelligence Score
+- AI Outlook
+- Risk Assessment
+- Opportunity Assessment
+- Recommended Action
+
+Styling classes:
+- ai-intelligence-card
+- intelligence-score
+- ai-block
+- ai-block-title
+- intelligence-badge
+
+Theme support:
+- Dark
+- Light
+- High Contrast
+
+11. Key Levels AI Rows
+Frontend file:
+src/components/KeyLevelsTable.jsx
+
+Backend file:
+backend/src/engine/outlookEngine.js
+
+Key Levels & Outlook now includes AI rows:
+- AI Outlook
+- AI Risk Assessment
+- AI Opportunity Assessment
+- Recommended Action
+
+Behavior:
+- Backend appends these rows to outlookRows.
+- Frontend KeyLevelsTable also has a compatibility guard to append AI rows if an older response lacks them.
+
+12. Fear & Greed Logic
+- Backend has fearGreedEngine.js.
+- Sentiment category is normalized from score ranges:
+  - 0-24: Extreme Fear
+  - 25-44: Fear
+  - 45-55: Neutral
+  - 56-74: Greed
+  - 75-100: Extreme Greed
+- Description matches the category.
+- Extreme Fear message:
+  "Extreme Fear often signals long-term buying opportunities. Consider accumulating gradually near support levels instead of entering all at once."
+
+13. Live Sentiment Integration
+Backend file:
+backend/src/services/sentimentService.js
+
+- Uses Alternative.me Fear & Greed API when available.
+- Uses existing fearGreedEngine.js for category normalization and description alignment.
+- Returns sentimentSource:
+  - alternative-me
+  - fallback
+- If live sentiment fails, fallback sentiment is used and dashboard does not break.
+
+14. Premium Index / Exchange Premium
+Backend file:
+backend/src/services/premiumService.js
+
+Real premium calculation is implemented when providers are available.
+
+Formula:
+premiumPercent = ((coinbasePrice - globalAveragePrice) / globalAveragePrice) * 100
+
+Provider inputs:
+- Coinbase spot price as Coinbase-side/exchange-side price.
+- CoinGecko global/simple price as global reference price.
+
+Labels:
+- BTC: Coinbase Premium Index
+- ETH/AVAX/DOGE/XRP/LTC: Exchange Premium Index
+
+Premium source:
+- premiumSource: live when calculated successfully
+- premiumSource: fallback when calculation fails
+
+Premium interpretation:
+- Positive premium: exchange pricing is stronger than global markets, suggesting stronger buying demand.
+- Negative premium: exchange pricing is weaker than global markets, suggesting softer demand or selling pressure.
+- Near zero: exchange pricing is closely aligned with global markets, suggesting balanced demand.
+
+Important:
+- API does not break if Coinbase or global reference calls fail.
+- If premium cannot be calculated, fallback premium data is used.
+
+15. Market Data Provider Chain
+Backend provider order for current price:
+1. Coinbase spot price API
+2. CoinMarketCap quote API, if COINMARKETCAP_API_KEY exists
+3. CoinGecko simple price API
+4. Local fallback market data
+
+Response metadata includes:
+- dataSource: live or fallback
+- priceProvider: coinbase, coinmarketcap, coingecko, or fallback
+- lastUpdated timestamp
+
+16. CoinGecko Mapping
+BTC -> bitcoin
+ETH -> ethereum
+AVAX -> avalanche-2
+DOGE -> dogecoin
+XRP -> ripple
+LTC -> litecoin
+
+17. Backend Caching
+Backend file:
+backend/src/services/cacheService.js
+
+Simple in-memory cache implemented.
+
+Cached data:
+- current price data
+- chart data
+- price history range data
+- comparison data
+- premium data
+- sentiment data
+
+Current TTLs:
+- price: 2 minutes
+- chart 7D/30D: 10 minutes
+- chart 90D/1Y: 30 minutes
+- comparison: 10 minutes
+- premium: 2 minutes
+- sentiment: 10 minutes
+
+No Redis, MongoDB, or external cache was added.
+
+18. Provider Diagnostics
+API response includes:
+providerDiagnostics: {
+  price,
+  chart,
+  premium,
+  sentiment,
+  cache
+}
+
+Example values:
+- price: coinbase / coinmarketcap / coingecko / fallback
+- chart: coingecko / fallback
+- premium: live coinbase-global / fallback
+- sentiment: alternative-me / fallback
+- cache: hit / miss
+
+Frontend displays Data Quality in the Calculated Market Signal card.
+
+19. Signal Confidence
+Backend file:
+backend/src/engine/signalConfidenceEngine.js
+
+API response includes:
+signalConfidence: {
+  score,
+  label,
+  notes
+}
+
+Confidence scoring:
+- Starts from 40.
+- Adds points for live price, chart data, live premium, live sentiment, technicalAnalysis, keyPriceZones.
+- Reduces points for fallback premium, fallback sentiment, missing chart data, and provider errors.
+
+Labels:
+- 0-39: Low Confidence
+- 40-69: Moderate Confidence
+- 70-84: High Confidence
+- 85-100: Very High Confidence
+
+Frontend displays Signal Confidence in Calculated Market Signal.
+
+20. Current API Endpoints
+GET /health
+GET /market/outlook/:symbol
+
+Supported symbols:
+- BTC
+- ETH
+- AVAX
+- DOGE
+- XRP
+- LTC
+
+Examples:
+GET /market/outlook/BTC
+GET /market/outlook/LTC
+
+21. Technical Analysis Engine
+Backend file:
+backend/src/engine/technicalAnalysisEngine.js
+
+Responsibilities:
+- normalize price series
+- calculate SMA 20
+- calculate SMA 50
+- calculate 7-day change percentage
+- calculate 30-day change percentage
+- calculate momentum score
+- calculate trend classification
+- calculate volatility percentage
+- classify volatility
+- generate technical summary fields
+
+Output shape:
+technicalAnalysis: {
+  sma20,
+  sma50,
+  trend,
+  trendBias,
+  momentum,
+  momentumScore,
+  volatility,
+  volatilityScore,
+  priceVsSma20,
+  priceVsSma50,
+  sevenDayChange,
+  thirtyDayChange
+}
+
+22. Support/Resistance Engine
+Backend file:
+backend/src/engine/supportResistanceEngine.js
+
+Responsibilities:
+- use recent price series
+- calculate range low/high
+- calculate base range
+- calculate support levels
+- calculate resistance levels
+- round levels by asset type
+
+Output shape:
+keyPriceZones: {
+  currentPrice,
+  rangeLow,
+  rangeHigh,
+  baseLow,
+  baseHigh,
+  supportLevels,
+  resistanceLevels
+}
+
+23. Signal Score Engine
+Backend file:
+backend/src/engine/signalScoreEngine.js
+
+Responsibilities:
+- generate calculated marketSignal from technical trend, momentum, volatility risk, fear/greed score, premium input, and live/fallback source inputs
+- preserve compatibility with MarketSignalPanel
+
+Output shape:
+marketSignal: {
+  score,
+  label,
+  status,
+  signals: [
+    { label: "Trend Strength", value },
+    { label: "Momentum", value },
+    { label: "Volatility Risk", value }
+  ]
+}
+
+Score labels:
+- 0-24: Strong Bearish
+- 25-44: Bearish / Caution
+- 45-55: Neutral
+- 56-69: Constructive
+- 70-84: Bullish Momentum
+- 85-100: Strong Bullish
+
+24. Market Chart Data
+Backend service:
+backend/src/services/marketDataService.js
+
+Functions include:
+- getMarketChartData(symbol)
+- getMarketChartRangeData(symbol, range)
+- getPriceHistoryData(symbol)
+- getComparisonChartData()
+
+Existing 60-day chart behavior is preserved for Phase 3 technical analysis and key price zones.
+
+Range chart behavior supports:
+- 7D
+- 30D
+- 90D
+- 1Y
+
+If chart data fails:
+- returns null/fallback metadata
+- does not break the API
+- outlookEngine uses fallback technicalAnalysis, keyPriceZones, historicalPerformance, marketStructure, priceHistory, comparisonPerformance, and AI narrative fields
+
+25. Outlook Engine Current Responsibilities
+Backend file:
+backend/src/engine/outlookEngine.js
+
+Responsibilities:
+- merge live current price into fallback dashboard shape
+- fetch chart data
+- fetch price history range data
+- fetch comparison chart data
+- calculate technical analysis
+- calculate support/resistance/key price zones
+- calculate historical performance
+- classify market structure/regime
+- build price history response
+- build performance comparison
+- calculate real premium when possible
+- fetch live sentiment when possible
+- calculate marketSignal
+- calculate signalConfidence
+- generate deterministic AI narrative intelligence
+- append AI rows to outlookRows
+- add providerDiagnostics
+- preserve fallback behavior
+- preserve dataSource, priceProvider, lastUpdated
+- preserve fearGreed normalization
+- update outlookRows with calculated technical context
+- update takeaways with calculated technical context
+
+26. API Response Shape
+GET /market/outlook/:symbol returns existing fields plus Phase 6 fields:
+{
+  symbol,
+  name,
+  period,
+  snapshotDate,
+  lastUpdated,
+  dataSource,
+  priceProvider,
+  currentPrice,
+  premiumIndexLabel,
+  premiumIndex,
+  premiumSource,
+  sentimentSource,
+  fearGreedIndex,
+  priceBias,
+  marketSignal,
+  signalConfidence,
+  providerDiagnostics,
+  snapshotTrend,
+  sparklines,
+  historicalPerformance,
+  marketStructure,
+  technicalAnalysis,
+  keyPriceZones,
+  priceHistory,
+  intelligenceScore,
+  aiOutlook,
+  riskAssessment,
+  opportunityAssessment,
+  recommendedAction,
+  outlookRows,
+  comparisonPerformance,
+  takeaways
+}
+
+27. Calculated Market Signal Layout
+Frontend file:
+src/components/MarketSignalPanel.jsx
+
+Current layout:
+- Desktop:
+  - Left: score + label
+  - Middle: stacked signal bars:
+    - Trend Strength
+    - Momentum
+    - Volatility Risk
+  - Right: Signal Confidence
+  - Bottom: Data Quality row
+- Tablet:
+  - score + stacked signal bars side by side
+  - confidence wraps below
+- Mobile:
+  - score, signal bars, confidence, and data quality stack vertically
+
+28. Market Outlook Card Layout
+Frontend file:
+src/components/CryptoMarketDashboard.jsx
+
+- Market Outlook and Calculated Market Signal are stacked vertically, not side-by-side.
+- Crypto selector moved into same control area as status/refresh.
+- Mobile status area is compacted into a two-column grid:
+  - Live/Fallback Data
+  - Confidence
+  - Last updated
+  - Refresh
+- Mobile and tablet spacing was tightened to reduce Market Outlook card height.
+
+29. Frontend Data Flow
+CryptoMarketDashboard.jsx:
+- selectedCrypto state defaults to BTC
+- fetches backend with getMarketOutlook(selectedCrypto)
+- shows loading state
+- shows fallback warning if API fails
+- uses src/data/cryptoDashboardData.js as local fallback
+- renders HistoricalPerformanceCards after Current Snapshot
+- renders MarketStructurePanel after Historical Performance
+- renders TechnicalAnalysisCards after Market Structure
+- renders KeyPriceZonesChart before Price History Chart
+- renders PriceHistoryChart before AI Intelligence Center
+- renders AIIntelligenceCenter before Key Levels & Outlook
+- renders PerformanceComparison after Key Levels & Outlook
+- keeps refresh logic
+- keeps selected crypto logic
+- theme switcher remains functional
+
+30. Fallback Data
+Backend fallback:
+backend/src/data/fallbackMarketData.js
+
+Frontend fallback:
+src/data/cryptoDashboardData.js
+
+Both include fallback data for all supported assets:
+- BTC
+- ETH
+- AVAX
+- DOGE
+- XRP
+- LTC
+
+Both include:
+- currentPrice
+- premiumIndex
+- premiumSource
+- sentimentSource
+- fearGreedIndex
+- priceBias
+- marketSignal
+- signalConfidence
+- providerDiagnostics
+- snapshotTrend
+- sparklines
+- historicalPerformance
+- marketStructure
+- technicalAnalysis
+- keyPriceZones
+- priceHistory
+- intelligenceScore
+- aiOutlook
+- riskAssessment
+- opportunityAssessment
+- recommendedAction
+- outlookRows with AI rows
+- comparisonPerformance
+- takeaways
+
+31. Environment Files
+Frontend .env.example:
+VITE_API_URL=http://localhost:3000
+
+Backend .env.example:
+PORT=3000
+CLIENT_URL=http://localhost:5173
+COINMARKETCAP_API_KEY=
+
+32. Local Run Instructions
+Frontend:
+cd D:\W\crypto-market-dashboard
+npm run dev
+
+Backend:
+cd D:\W\crypto-market-dashboard\backend
+npm install
+npm run dev
+
+Expected URLs:
+- Frontend: http://localhost:5173
+- Backend: http://localhost:3000
+- Health: http://localhost:3000/health
+- Market API: http://localhost:3000/market/outlook/BTC
+- LTC API: http://localhost:3000/market/outlook/LTC
+
+33. Verification Completed
+- npm run build passes.
+- Backend smoke test passed for BTC, ETH, AVAX, DOGE, XRP, LTC.
+- Express route test passed for /health and /market/outlook/LTC.
+- API returns:
+  - technicalAnalysis
+  - keyPriceZones
+  - calculated marketSignal
+  - signalConfidence
+  - providerDiagnostics
+  - premiumSource
+  - sentimentSource
+  - historicalPerformance
+  - marketStructure
+  - priceHistory
+  - comparisonPerformance
+  - intelligenceScore
+  - aiOutlook
+  - riskAssessment
+  - opportunityAssessment
+  - recommendedAction
+- Key Levels & Outlook includes AI rows.
+- Frontend fallback data imports correctly.
+- LTC works in backend and frontend fallback.
+- Existing crypto selector behavior is preserved.
+- Theme switcher builds successfully.
+- Light theme contrast remains supported.
+- Mobile/tablet Market Outlook card height was reduced.
+- Market Outlook and Calculated Market Signal are stacked vertically.
+- Phase 6 AI Intelligence Center renders between Price History Chart and Key Levels & Outlook.
+
+Known Build Note:
+- Vite shows a chunk-size warning over 500 kB.
+- Build succeeds.
+- This is not currently treated as a blocker.
+
+Potential Next Phase Ideas:
+1. Add persistent theme preference in localStorage.
+2. Add provider health endpoint for diagnostics.
+3. Add better multi-provider global average pricing for premium calculation.
+4. Add manual refresh cooldown to prevent API spam.
+5. Add deployment configuration and production docs.
+6. Add tests for engines and service fallbacks.
+7. Add richer 24h/7d/30d market structure metrics.
+8. Add optional chart annotations for support/resistance levels.
+9. Improve frontend bundle splitting to address Vite chunk-size warning.
+10. Add explainable scoring details for AI narrative components.
+
+Important Next Phase Rules:
+- Keep changes additive.
+- Keep dashboard layout intact unless explicitly requested.
+- Do not remove fallback behavior.
+- Do not remove LTC.
+- Do not add TypeScript.
+- Do not add authentication, routing, MongoDB, alerts, portfolio tracking, or chatbot functionality unless explicitly requested.
+- Keep app educational/informational, not financial advice.

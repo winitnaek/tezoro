@@ -1,0 +1,147 @@
+You are working on Tezoro, a standalone React/Vite crypto market dashboard app.
+
+This file summarizes what has been completed so far in Phase 1.
+
+Brand:
+- App name: Tezoro
+- Tagline: Crypto Intelligence
+- Browser title: Tezoro | Crypto Intelligence
+- Premium fintech/crypto visual direction
+- Brand header uses:
+  - `src/assets/tezoro-logo.png`
+  - `src/assets/tezoro-wordmark.png`
+- Logo and wordmark are aligned and responsive.
+- Mobile brand header is centered and constrained so it does not overflow.
+
+Tech Stack:
+- React 18
+- Vite 5
+- JavaScript only
+- JSX only
+- Bootstrap
+- Reactstrap
+- Axios
+- Recharts
+- Frontend only
+- No backend
+- No routing
+- No authentication
+- No live APIs yet
+
+Project Structure:
+- `src/main.jsx`
+- `src/App.jsx`
+- `src/data/cryptoDashboardData.js`
+- `src/components/CryptoSelector.jsx`
+- `src/components/CryptoMarketDashboard.jsx`
+- `src/components/CurrentSnapshot.jsx`
+- `src/components/KeyLevelsTable.jsx`
+- `src/components/QuickTakeaways.jsx`
+- `src/styles/app.css`
+- `src/assets/tezoro-logo.png`
+- `src/assets/tezoro-wordmark.png`
+
+Supported Cryptos:
+- BTC
+- ETH
+- AVAX
+- DOGE
+- XRP
+
+Default Crypto:
+- BTC
+
+Completed UI:
+1. Brand Header
+- Separate top brand header.
+- Displays Tezoro logo and Tezoro Crypto Intelligence wordmark.
+- Responsive desktop/mobile sizing.
+- Mobile lockup is centered and constrained so it does not overflow the card.
+
+2. Market Outlook Header
+- Shows `{SYMBOL} Market Outlook`.
+- Shows "Next 1-2 Weeks Market Intelligence".
+- Shows date range.
+- Shows current snapshot date.
+- Includes crypto selector.
+
+3. Crypto Selector
+- Buttons for BTC, ETH, AVAX, DOGE, XRP.
+- BTC selected by default.
+- Active selected crypto is highlighted.
+- Clicking a crypto updates dashboard data immediately.
+- No page refresh.
+- Responsive wrapping segmented button group.
+
+4. Current Snapshot Section
+- Three responsive cards:
+  - Current Price
+  - Premium Index
+  - Fear & Greed Index
+- Each card shows:
+  - label
+  - value
+  - description
+  - bias badge
+
+5. Key Levels & Outlook Section
+- Reactstrap responsive table.
+- Columns:
+  - Metric
+  - Details
+  - Interpretation
+  - Bias
+- Bias badges map to visual intent:
+  - buy = success
+  - sell = danger
+  - neutral = warning
+  - caution = info/warning
+- Table is horizontally scrollable on mobile.
+
+6. Quick Takeaways Section
+- Three responsive cards:
+  - Trend Expectation
+  - Best Strategy
+  - Risk Note
+
+7. Disclaimer
+- Includes:
+  "Tezoro Crypto Intelligence provides market intelligence and educational insights only, not financial advice."
+
+Styling Completed:
+- Premium fintech look.
+- Modern crypto analytics style.
+- Dark navy/slate dashboard background.
+- Bitcoin orange accent.
+- Subtle blue/teal highlights.
+- Clean professional cards.
+- Soft shadows.
+- Rounded cards.
+- Responsive layout.
+- Mobile-friendly table and selector.
+- Brand header and wordmark sizing refined after visual review.
+
+Important Constraints To Preserve:
+- Keep existing component architecture.
+- Keep existing dashboard logic.
+- Keep mock data structure.
+- Keep BTC/ETH/AVAX/DOGE/XRP switching working.
+- Do not add backend or APIs yet.
+- Do not add routing yet.
+- Do not add authentication yet.
+- Do not introduce TypeScript.
+- Do not create `.ts` or `.tsx` files.
+- Do not add `tsconfig`.
+
+Verification Completed:
+- `npm run build` passes.
+- Dev server should run with:
+  `npm run dev`
+- Expected local URL:
+  `http://localhost:5173`
+
+Known Future Improvements:
+- Add real API integration later.
+- Add richer charts with Recharts later.
+- Add backend/auth only in a later phase if needed.
+- Continue optimizing image assets if needed.

@@ -1,0 +1,133 @@
+You are building Phase 1 of a standalone React/Vite crypto market dashboard app named Tezoro.
+
+Brand:
+- Name: Tezoro
+- Tagline: Crypto Intelligence
+- Browser title: Tezoro | Crypto Intelligence
+
+Tech Requirements:
+- React 18
+- Vite 5, compatible with Node 18.17.1
+- JavaScript only
+- JSX only
+- Do not use TypeScript
+- Do not create .ts or .tsx files
+- Do not add tsconfig
+- Frontend only
+- No backend
+- No routing
+- No authentication
+- No live APIs yet
+
+Dependencies:
+- bootstrap
+- reactstrap
+- axios
+- recharts
+
+Current App Scope:
+Build a frontend-only crypto market intelligence dashboard using mock data.
+
+Supported Cryptos:
+- BTC
+- ETH
+- AVAX
+- DOGE
+- XRP
+
+Default Crypto:
+- BTC
+
+Current UI:
+1. Separate top brand header:
+   - Circular "T" logo placeholder
+   - Tezoro
+   - Crypto Intelligence
+
+2. Market outlook header:
+   - {SYMBOL} Market Outlook
+   - Next 1-2 Weeks Market Intelligence
+   - Date range
+   - Current snapshot date
+   - Crypto selector
+
+3. Crypto selector:
+   - Buttons for BTC, ETH, AVAX, DOGE, XRP
+   - BTC selected by default
+   - Active selected crypto is highlighted
+   - Clicking a crypto updates dashboard data immediately
+   - No page refresh
+   - Responsive wrapping segmented button group
+
+4. Current Snapshot section:
+   - Three responsive cards:
+     - Current Price
+     - Premium Index
+     - Fear & Greed Index
+   - Each card shows label, value, description, and bias badge
+
+5. Key Levels & Outlook section:
+   - Reactstrap responsive table
+   - Columns:
+     - Metric
+     - Details
+     - Interpretation
+     - Bias
+   - Bias badges:
+     - buy = success
+     - sell = danger
+     - neutral = warning
+     - caution = info/warning
+   - Horizontally scrollable on mobile
+
+6. Quick Takeaways section:
+   - Three responsive cards:
+     - Trend Expectation
+     - Best Strategy
+     - Risk Note
+
+7. Disclaimer:
+   - "Tezoro Crypto Intelligence provides market intelligence and educational insights only, not financial advice."
+
+Current Project Structure:
+crypto-market-dashboard/
+  package.json
+  index.html
+  src/
+    main.jsx
+    App.jsx
+    data/
+      cryptoDashboardData.js
+    components/
+      CryptoSelector.jsx
+      CryptoMarketDashboard.jsx
+      CurrentSnapshot.jsx
+      KeyLevelsTable.jsx
+      QuickTakeaways.jsx
+    styles/
+      app.css
+
+Styling Direction:
+- Premium fintech
+- Modern crypto analytics
+- Dark navy/slate dashboard background
+- Bitcoin orange accent
+- Subtle blue/teal highlights
+- Clean professional cards
+- Soft shadows
+- Rounded cards
+- Responsive layout
+- Mobile-friendly table and selector
+
+Important:
+- Keep existing component architecture.
+- Keep existing dashboard logic.
+- Keep mock data structure.
+- Keep BTC/ETH/AVAX/DOGE/XRP switching working.
+- Do not add backend or APIs yet.
+- Do not introduce TypeScript.
+
+Verification:
+- App builds with npm run build.
+- Dev server runs with npm run dev.
+- Expected local URL: http://localhost:5173

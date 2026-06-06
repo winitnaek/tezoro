@@ -1,0 +1,334 @@
+﻿You are working on Tezoro, an existing standalone React/Vite crypto market dashboard app.
+
+This prompt describes the current completed state after Phase 1, Phase 1.5, and Phase 2.
+Use this as the baseline for any next phase of development.
+
+Project Location:
+- D:\W\crypto-market-dashboard
+
+Brand:
+- App name: Tezoro
+- Tagline: Crypto Intelligence
+- Browser title: Tezoro | Crypto Intelligence
+
+Core Product:
+Tezoro is a premium crypto market intelligence dashboard. It shows a market outlook, signal score, live/fallback crypto pricing, sentiment context, key levels, quick takeaways, and educational market notes for selected crypto assets.
+
+Supported Cryptos:
+- BTC
+- ETH
+- AVAX
+- DOGE
+- XRP
+- LTC
+
+Default Crypto:
+- BTC
+
+Frontend Tech Stack:
+- React 18
+- Vite 5
+- JavaScript only
+- JSX only
+- Bootstrap
+- Reactstrap
+- Axios
+- Recharts
+- Custom CSS in src/styles/app.css
+
+Frontend Constraints:
+- No TypeScript
+- No .ts or .tsx files
+- No routing yet
+- No authentication yet
+- No MongoDB on frontend
+- Preserve existing component architecture
+- Preserve existing Tezoro branding and visual style
+- Preserve BTC/ETH/AVAX/DOGE/XRP/LTC switching behavior
+
+Backend Tech Stack:
+- Node.js 18+
+- Express 4
+- Axios
+- dotenv
+- helmet
+- cors
+- morgan
+- nodemon for development
+
+Backend Constraints:
+- No authentication yet
+- No MongoDB yet
+- Backend is API foundation only
+- Keep logic simple and maintainable
+- Complex market intelligence calculations belong to a later phase
+
+Current Frontend Structure:
+crypto-market-dashboard/
+  package.json
+  index.html
+  vite.config.js
+  .env.example
+  README.md
+  src/
+    main.jsx
+    App.jsx
+    data/
+      cryptoDashboardData.js
+    services/
+      marketApi.js
+    components/
+      CryptoSelector.jsx
+      CryptoMarketDashboard.jsx
+      CurrentSnapshot.jsx
+      KeyLevelsTable.jsx
+      QuickTakeaways.jsx
+      MarketSignalPanel.jsx
+      MiniSparkline.jsx
+    assets/
+      tezoro-logo.png
+      tezoro-wordmark.svg
+    styles/
+      app.css
+
+Current Backend Structure:
+crypto-market-dashboard/
+  backend/
+    package.json
+    package-lock.json
+    server.js
+    .env.example
+    src/
+      app.js
+      routes/
+        marketRoutes.js
+      controllers/
+        marketController.js
+      services/
+        marketDataService.js
+      engine/
+        outlookEngine.js
+        fearGreedEngine.js
+      data/
+        fallbackMarketData.js
+
+Completed Frontend Features:
+1. Brand Header
+- Tezoro logo image
+- Custom Tezoro SVG wordmark
+- Premium dark fintech visual treatment
+- Responsive layout
+- Logo and wordmark are aligned and sized for desktop/mobile
+
+2. Market Outlook Overview
+- Two-card hero layout:
+  - Left card: selected crypto Market Outlook
+  - Right card: Market Signal Score
+- Left card includes:
+  - {SYMBOL} Market Outlook
+  - Next 1-2 Weeks Market Intelligence
+  - Date range
+  - Current snapshot date
+  - Live/fallback data status row
+  - Last updated timestamp
+  - Refresh button
+  - Crypto selector
+- Right card includes:
+  - Market Signal Score
+  - Numeric signal score
+  - Signal label
+  - Progress bars for signal components
+
+3. Crypto Selector
+- BTC, ETH, AVAX, DOGE, XRP, LTC buttons
+- BTC selected by default
+- Clicking a crypto updates the dashboard immediately
+- Responsive wrapping segmented button group
+- Existing behavior preserved after API integration
+
+4. Current Snapshot Section
+- Three cards:
+  - Current Price
+  - Premium Index
+  - Fear & Greed Index
+- Each card supports:
+  - label
+  - value
+  - description
+  - bias badge
+  - mini sparkline/trend context
+
+5. Fear & Greed Display
+- Sentiment category is calculated from score ranges:
+  - 0-24: Extreme Fear
+  - 25-44: Fear
+  - 45-55: Neutral
+  - 56-74: Greed
+  - 75-100: Extreme Greed
+- Snapshot description matches the calculated category.
+- Extreme Fear description:
+  "Extreme Fear often signals long-term buying opportunities. Consider accumulating gradually near support levels instead of entering all at once."
+
+6. Key Levels & Outlook Section
+- Responsive Reactstrap table
+- Columns:
+  - Metric
+  - Details
+  - Interpretation
+  - Bias
+- Mobile horizontal scroll support
+- Bias badges styled for buy/sell/neutral/caution
+
+7. Quick Takeaways Section
+- Three cards:
+  - Trend Expectation
+  - Best Strategy
+  - Risk Note
+
+8. Disclaimer
+- Tezoro Crypto Intelligence provides market intelligence and educational insights only, not financial advice.
+
+9. Fallback Behavior
+- Frontend keeps local mock data in src/data/cryptoDashboardData.js
+- If backend call fails, dashboard uses local fallback data
+- UI shows a small fallback notice instead of breaking
+
+Completed Backend Features:
+1. Express API Server
+- Backend lives in backend/
+- server.js starts the API
+- src/app.js configures Express, CORS, helmet, morgan, JSON parsing, routes, and error handling
+
+2. Health Endpoint
+GET /health
+
+Response:
+{
+  "status": "ok",
+  "service": "tezoro-market-api"
+}
+
+3. Market Outlook Endpoint
+GET /market/outlook/:symbol
+
+Supported symbols:
+- BTC
+- ETH
+- AVAX
+- DOGE
+- XRP
+- LTC
+
+Example:
+GET /market/outlook/BTC
+
+4. Market Data Provider Chain
+The backend tries providers in this order:
+1. Coinbase spot price API
+2. CoinMarketCap quote API, if COINMARKETCAP_API_KEY is configured
+3. CoinGecko simple price API
+4. Local fallback market data
+
+5. Provider Behavior
+- Coinbase is used first for simple current USD spot price.
+- CoinMarketCap is retained as a richer optional provider when an API key exists.
+- CoinGecko is used as an additional free fallback provider.
+- If all live providers fail, backend returns fallback data.
+
+6. API Response Metadata
+Backend response includes:
+- dataSource: "live" or "fallback"
+- priceProvider: "coinbase", "coinmarketcap", "coingecko", or "fallback"
+- lastUpdated timestamp
+
+7. Current Price Formatting
+- Large assets like BTC/ETH display rounded whole dollar prices.
+- Mid-priced assets like AVAX/XRP/LTC display two decimals.
+- Small-priced assets like DOGE display enough decimals to be useful.
+
+8. Outlook Engine
+File:
+backend/src/engine/outlookEngine.js
+
+Responsibilities:
+- Merge live current price into fallback dashboard shape
+- Preserve fallback/static outlook rows and takeaways
+- Update lastUpdated timestamp
+- Apply live/fallback source metadata
+- Apply priceProvider metadata
+- Apply Fear & Greed category/description normalization
+
+9. Fear & Greed Engine
+File:
+backend/src/engine/fearGreedEngine.js
+
+Responsibilities:
+- Convert Fear & Greed score into sentiment category
+- Return category-specific descriptions
+- Keep score/category/description aligned
+
+Environment Files:
+Frontend .env.example:
+VITE_API_URL=http://localhost:3000
+
+Backend .env.example:
+PORT=3000
+CLIENT_URL=http://localhost:5173
+COINMARKETCAP_API_KEY=
+
+Local Run Instructions:
+Frontend:
+cd D:\W\crypto-market-dashboard
+npm run dev
+
+Backend:
+cd D:\W\crypto-market-dashboard\backend
+npm install
+npm run dev
+
+Expected URLs:
+- Frontend: http://localhost:5173
+- Backend: http://localhost:3000
+- Health: http://localhost:3000/health
+- Market API: http://localhost:3000/market/outlook/BTC
+
+Current UI Direction:
+- Premium fintech dashboard
+- Dark navy/slate background
+- Bitcoin orange accent for selected crypto / BTC label
+- Blue/teal highlights
+- Clean cards with subtle borders and shadows
+- Compact Market Outlook hero
+- Responsive mobile layout
+- Tables scroll cleanly on mobile
+- Avoid marketing landing pages
+
+Important Baseline Rules For Next Phase:
+- Build on top of this codebase.
+- Do not rebuild the frontend from scratch.
+- Do not replace the existing Tezoro brand header.
+- Do not remove the fallback local mock data.
+- Do not break BTC/ETH/AVAX/DOGE/XRP/LTC switching.
+- Do not introduce TypeScript.
+- Do not add auth/routing/MongoDB unless the next phase explicitly requests it.
+- Keep dashboard usable when live providers fail.
+- Keep API response shape compatible with the existing frontend.
+- Keep the app educational/informational, not financial advice.
+
+Verification Completed:
+- Frontend build passes with npm run build.
+- Backend health endpoint works.
+- Backend market endpoint returns valid dashboard JSON.
+- Coinbase live prices work for BTC, ETH, AVAX, DOGE, XRP, and LTC.
+- Price formatting was adjusted so AVAX, DOGE, XRP, and LTC display meaningful current prices.
+- Fear & Greed category and description now match the score range.
+- Existing dashboard UI and crypto selector behavior are preserved.
+
+Recommended Next Phase Ideas:
+- Phase 3: Add richer technical analysis engine using live market candles.
+- Add support/resistance calculation from OHLC data.
+- Add trend strength from moving averages.
+- Add volatility and range detection.
+- Add real Fear & Greed API integration if desired.
+- Add caching/rate-limit protection for live market providers.
+- Add deployment configuration for frontend/backend.
