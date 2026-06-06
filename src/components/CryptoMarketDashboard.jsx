@@ -184,7 +184,7 @@ function CryptoMarketDashboard() {
                 <span>{dashboardData.period.startDate} - {dashboardData.period.endDate}</span>
                 <span>Current Snapshot: {dashboardData.snapshotDate}</span>
               </div>
-              <div className="market-data-status">
+              <div className="market-data-status" style={{flexDirection:'row'}}>
                 <div className="market-status-actions">
                   <span className={dashboardData.dataSource === 'live' ? 'live-data-badge' : 'fallback-data-badge'}>
                     {dataSourceLabel}

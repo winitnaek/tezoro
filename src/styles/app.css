@@ -1911,6 +1911,12 @@ button {
   .crypto-selector-wrap {
     justify-content: flex-start;
     width: 100%;
+    flex: 1 1 100%;
+  }
+
+  .crypto-selector-wrap .btn-group {
+    width: 100%;
+    justify-content: flex-start;
   }
 
   .market-data-status {
@@ -2082,10 +2088,14 @@ button {
 
   .market-data-status {
     margin-top: 13px;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 12px;
   }
 
   .market-status-actions {
     gap: 8px;
+    width: 100%;
   }
 
   .live-data-badge,
@@ -2095,7 +2105,18 @@ button {
     padding: 4px 9px;
   }
 
+  .crypto-selector-wrap {
+    width: 100%;
+    flex: 1 1 100%;
+  }
+
+  .crypto-selector-wrap .btn-group {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
   .crypto-selector-btn {
+    flex: 1 1 76px;
     min-width: 66px;
     min-height: 34px;
     font-size: 0.84rem;
