@@ -1,12 +1,32 @@
-﻿const cryptoDashboardData = {
+function addDays(date, days) {
+  const nextDate = new Date(date)
+  nextDate.setDate(nextDate.getDate() + days)
+  return nextDate
+}
+
+function formatDisplayDate(date) {
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  }).format(date)
+}
+
+function buildRollingPeriod(date = new Date()) {
+  return {
+    period: {
+      startDate: formatDisplayDate(date),
+      endDate: formatDisplayDate(addDays(date, 14)),
+    },
+    snapshotDate: formatDisplayDate(date),
+  }
+}
+
+const cryptoDashboardData = {
   BTC: {
     symbol: "BTC",
     name: "Bitcoin",
-    period: {
-      startDate: "May 28, 2026",
-      endDate: "June 11, 2026",
-    },
-    snapshotDate: "May 28, 2026",
+    ...buildRollingPeriod(),
     currentPrice: "~$73,246",
     premiumIndexLabel: "Coinbase Premium Index",
     premiumIndex: {
@@ -103,11 +123,7 @@
   ETH: {
     symbol: "ETH",
     name: "Ethereum",
-    period: {
-      startDate: "May 28, 2026",
-      endDate: "June 11, 2026",
-    },
-    snapshotDate: "May 28, 2026",
+    ...buildRollingPeriod(),
     currentPrice: "~$3,850",
     premiumIndexLabel: "Exchange Premium Index",
     premiumIndex: {
@@ -204,11 +220,7 @@
   AVAX: {
     symbol: "AVAX",
     name: "Avalanche",
-    period: {
-      startDate: "May 28, 2026",
-      endDate: "June 11, 2026",
-    },
-    snapshotDate: "May 28, 2026",
+    ...buildRollingPeriod(),
     currentPrice: "~$38",
     premiumIndexLabel: "Exchange Premium Index",
     premiumIndex: {
@@ -305,11 +317,7 @@
   DOGE: {
     symbol: "DOGE",
     name: "Dogecoin",
-    period: {
-      startDate: "May 28, 2026",
-      endDate: "June 11, 2026",
-    },
-    snapshotDate: "May 28, 2026",
+    ...buildRollingPeriod(),
     currentPrice: "~$0.165",
     premiumIndexLabel: "Exchange Premium Index",
     premiumIndex: {
@@ -406,11 +414,7 @@
   XRP: {
     symbol: "XRP",
     name: "XRP",
-    period: {
-      startDate: "May 28, 2026",
-      endDate: "June 11, 2026",
-    },
-    snapshotDate: "May 28, 2026",
+    ...buildRollingPeriod(),
     currentPrice: "~$0.62",
     premiumIndexLabel: "Exchange Premium Index",
     premiumIndex: {
@@ -507,11 +511,7 @@
   LTC: {
     symbol: "LTC",
     name: "Litecoin",
-    period: {
-      startDate: "May 28, 2026",
-      endDate: "June 11, 2026",
-    },
-    snapshotDate: "May 28, 2026",
+    ...buildRollingPeriod(),
     currentPrice: "~$84",
     premiumIndexLabel: "Exchange Premium Index",
     premiumIndex: {
@@ -1188,5 +1188,7 @@ Object.entries(fallbackIntelligence).forEach(([symbol, intelligence]) => {
 })
 
 export default cryptoDashboardData
+
+
 
 

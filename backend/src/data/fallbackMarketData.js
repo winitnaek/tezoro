@@ -1,9 +1,32 @@
-﻿const extremeFearDescription =
+const extremeFearDescription =
   'Extreme Fear often signals long-term buying opportunities. Consider accumulating gradually near support levels instead of entering all at once.';
 
 const { buildAiNarrative } = require('../engine/aiNarrativeEngine');
 const { buildTechnicalRating } = require('../engine/technicalRatingEngine');
 
+function addDays(date, days) {
+  const nextDate = new Date(date);
+  nextDate.setDate(nextDate.getDate() + days);
+  return nextDate;
+}
+
+function formatDisplayDate(date) {
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric'
+  }).format(date);
+}
+
+function buildRollingPeriod(date = new Date()) {
+  return {
+    period: {
+      startDate: formatDisplayDate(date),
+      endDate: formatDisplayDate(addDays(date, 14))
+    },
+    snapshotDate: formatDisplayDate(date)
+  };
+}
 function createOutlook({
   symbol,
   name,
@@ -27,11 +50,7 @@ function createOutlook({
   return {
     symbol,
     name,
-    period: {
-      startDate: 'May 28, 2026',
-      endDate: 'June 11, 2026'
-    },
-    snapshotDate: 'May 28, 2026',
+    ...buildRollingPeriod(),
     lastUpdated: '',
     dataSource: 'fallback',
     currentPrice,
@@ -708,4 +727,6 @@ Object.entries(fallbackIntelligence).forEach(([symbol, intelligence]) => {
 });
 
 module.exports = fallbackMarketData;
+
+
 
