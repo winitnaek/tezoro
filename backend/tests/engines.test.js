@@ -8,6 +8,7 @@ const { buildSignalConfidence } = require('../src/engine/signalConfidenceEngine'
 const { buildMarketSignal } = require('../src/engine/signalScoreEngine');
 const { buildTechnicalAnalysis } = require('../src/engine/technicalAnalysisEngine');
 const { buildTechnicalRating } = require('../src/engine/technicalRatingEngine');
+const fallbackMarketData = require('../src/data/fallbackMarketData');
 
 function buildChart(days = 120, start = 100) {
   const startTime = Date.UTC(2026, 0, 1);
@@ -153,4 +154,21 @@ test('aiNarrativeEngine creates deterministic narrative fields', () => {
   assert.equal(typeof narrative.intelligenceScore.score, 'number');
   assert.ok(narrative.aiOutlook.headline.includes('BTC'));
   assert.ok(narrative.recommendedAction.action);
+  assert.ok(narrative.aiDecisionBrief);
+  assert.ok(narrative.aiDecisionBrief.marketStory);
+  assert.ok(narrative.aiDecisionBrief.suggestedApproach);
+  assert.ok(Array.isArray(narrative.aiDecisionBrief.keyRisks));
+  assert.ok(Array.isArray(narrative.aiDecisionBrief.opportunities));
+  assert.ok(Array.isArray(narrative.aiDecisionBrief.whyThisOutlook));
+  assert.ok(narrative.aiDecisionBrief.confidenceLabel);
+});
+
+test('fallback market data includes AI decision brief for every supported asset', () => {
+  const symbols = ['BTC', 'ETH', 'AVAX', 'DOGE', 'XRP', 'LTC'];
+
+  symbols.forEach((symbol) => {
+    assert.ok(fallbackMarketData[symbol].aiDecisionBrief, `${symbol} should include aiDecisionBrief`);
+    assert.ok(fallbackMarketData[symbol].aiDecisionBrief.marketStory);
+    assert.ok(fallbackMarketData[symbol].aiDecisionBrief.suggestedApproach);
+  });
 });

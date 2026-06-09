@@ -308,6 +308,7 @@ function enhanceOutlookWithIntelligence({
     riskAssessment: aiNarrative.riskAssessment,
     opportunityAssessment: aiNarrative.opportunityAssessment,
     recommendedAction: aiNarrative.recommendedAction,
+    aiDecisionBrief: aiNarrative.aiDecisionBrief,
     marketSignal,
     signalConfidence,
     providerDiagnostics,

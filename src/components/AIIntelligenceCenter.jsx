@@ -1,24 +1,54 @@
-import { Badge, Card, CardBody, Col, Row } from 'reactstrap'
+import { Badge, Card, CardBody } from 'reactstrap'
 
-const badgeColorByBias = {
-  buy: 'success',
-  sell: 'danger',
-  neutral: 'warning',
-  caution: 'info',
+const badgeColorByPosture = {
+  Defensive: 'danger',
+  Neutral: 'warning',
+  Opportunistic: 'success',
+  'Breakout Watch': 'info',
 }
 
-function AIList({ items }) {
+function DecisionList({ className, items }) {
   if (!Array.isArray(items) || !items.length) {
-    return null
+    return <p className="ai-decision-muted">No major items are flagged.</p>
   }
 
   return (
-    <ul className="ai-list">
+    <ul className={className}>
       {items.map((item) => (
         <li key={item}>{item}</li>
       ))}
     </ul>
   )
+}
+
+function buildFallbackBrief({
+  aiOutlook,
+  riskAssessment,
+  opportunityAssessment,
+  recommendedAction,
+  intelligenceScore,
+}) {
+  if (!aiOutlook && !riskAssessment && !opportunityAssessment && !recommendedAction) {
+    return null
+  }
+
+  return {
+    posture: riskAssessment?.level === 'High'
+      ? 'Defensive'
+      : ['Strong', 'Exceptional'].includes(opportunityAssessment?.level)
+        ? 'Opportunistic'
+        : 'Neutral',
+    marketStory: aiOutlook?.summary || 'Rule-based market narrative is being calculated from current dashboard signals.',
+    suggestedApproach: recommendedAction?.summary || 'Maintain a neutral stance until the signal improves.',
+    keyRisks: riskAssessment?.riskFactors || [],
+    opportunities: opportunityAssessment?.opportunities || [],
+    whyThisOutlook: [
+      aiOutlook?.headline,
+      riskAssessment?.summary,
+      opportunityAssessment?.summary,
+    ].filter(Boolean),
+    confidenceLabel: intelligenceScore?.label || 'Confidence Pending',
+  }
 }
 
 function AIIntelligenceCenter({
@@ -27,81 +57,73 @@ function AIIntelligenceCenter({
   riskAssessment,
   opportunityAssessment,
   recommendedAction,
+  aiDecisionBrief,
 }) {
-  if (!intelligenceScore && !aiOutlook && !riskAssessment && !opportunityAssessment && !recommendedAction) {
+  const decisionBrief = aiDecisionBrief || buildFallbackBrief({
+    aiOutlook,
+    riskAssessment,
+    opportunityAssessment,
+    recommendedAction,
+    intelligenceScore,
+  })
+
+  if (!decisionBrief && !intelligenceScore) {
     return null
   }
 
+  const posture = decisionBrief?.posture || 'Neutral'
+  const confidenceLabel = decisionBrief?.confidenceLabel || intelligenceScore?.label || 'Confidence Pending'
+
   return (
-    <Card className="ai-intelligence-card">
+    <Card className="ai-intelligence-card ai-decision-card">
       <CardBody>
-        <div className="key-price-zone-header">
+        <div className="ai-decision-header">
           <div>
-            <div className="snapshot-label">AI Narrative Intelligence</div>
-            <p className="mb-0">Rule-based market narrative generated from current dashboard signals.</p>
+            <div className="snapshot-label">AI Intelligence Center</div>
+            <p className="mb-0">Rule-based decision brief generated from current Tezoro market signals.</p>
           </div>
-          {intelligenceScore && (
-            <div className="intelligence-score">
-              <span>{intelligenceScore.score}</span>
-              <strong>{intelligenceScore.label}</strong>
+          <div className="ai-score-panel">
+            <div>
+              <span className="ai-score-value">{intelligenceScore?.score ?? '--'}</span>
+              <span className="ai-decision-muted">{intelligenceScore?.label || 'Score Pending'}</span>
             </div>
-          )}
+            <Badge className="ai-posture-badge" color={badgeColorByPosture[posture] || 'secondary'}>
+              {posture}
+            </Badge>
+            <span className="ai-confidence-label">{confidenceLabel}</span>
+          </div>
         </div>
 
-        <Row className="g-3">
-          <Col lg="6">
-            <div className="ai-block h-100">
-              <div className="ai-block-title">
-                <span>AI Outlook</span>
-                {aiOutlook?.bias && (
-                  <Badge className="intelligence-badge" color={badgeColorByBias[aiOutlook.bias] || 'secondary'}>
-                    {aiOutlook.bias}
-                  </Badge>
-                )}
-              </div>
-              <h3>{aiOutlook?.headline || 'Outlook Pending'}</h3>
-              <p>{aiOutlook?.summary || 'Narrative intelligence is being calculated.'}</p>
-            </div>
-          </Col>
+        <section className="ai-market-story">
+          <span>Market Story</span>
+          <p>{decisionBrief?.marketStory || 'Market Story is being calculated.'}</p>
+        </section>
 
-          <Col lg="6">
-            <div className="ai-block h-100">
-              <div className="ai-block-title">
-                <span>Recommended Action</span>
-                <Badge className="intelligence-badge" color="warning">
-                  {recommendedAction?.action || 'Pending'}
-                </Badge>
-              </div>
-              <p>{recommendedAction?.summary || 'Action guidance is being calculated.'}</p>
-            </div>
-          </Col>
+        <section className="ai-action-callout">
+          <span>Suggested Approach</span>
+          <strong>{decisionBrief?.suggestedApproach || 'Maintain a neutral stance until the signal improves.'}</strong>
+        </section>
 
-          <Col lg="6">
-            <div className="ai-block h-100">
-              <div className="ai-block-title">
-                <span>Risk Assessment</span>
-                <Badge className="intelligence-badge" color={riskAssessment?.level === 'High' ? 'danger' : riskAssessment?.level === 'Moderate' ? 'info' : 'success'}>
-                  {riskAssessment?.level || 'Pending'}
-                </Badge>
-              </div>
-              <p>{riskAssessment?.summary || 'Risk assessment is being calculated.'}</p>
-              <AIList items={riskAssessment?.riskFactors} />
+        <div className="ai-risk-opportunity-grid">
+          <section className="ai-block">
+            <div className="ai-block-title">
+              <span>Key Risks</span>
             </div>
-          </Col>
+            <DecisionList className="ai-risk-list" items={decisionBrief?.keyRisks} />
+          </section>
 
-          <Col lg="6">
-            <div className="ai-block h-100">
-              <div className="ai-block-title">
-                <span>Opportunity Assessment</span>
-                <Badge className="intelligence-badge" color={['Strong', 'Exceptional'].includes(opportunityAssessment?.level) ? 'success' : opportunityAssessment?.level === 'Limited' ? 'danger' : 'warning'}>
-                  {opportunityAssessment?.level || 'Pending'}
-                </Badge>
-              </div>
-              <p>{opportunityAssessment?.summary || 'Opportunity assessment is being calculated.'}</p>
-              <AIList items={opportunityAssessment?.opportunities} />
+          <section className="ai-block">
+            <div className="ai-block-title">
+              <span>Opportunities</span>
             </div>
-          </Col>
-        </Row>
+            <DecisionList className="ai-opportunity-list" items={decisionBrief?.opportunities} />
+          </section>
+        </div>
+
+        <section className="ai-market-story ai-why-section">
+          <span>Why This Outlook</span>
+          <DecisionList className="ai-why-list" items={decisionBrief?.whyThisOutlook} />
+        </section>
       </CardBody>
     </Card>
   )

@@ -969,6 +969,86 @@ function getIntelligenceLabel(score) {
   return 'Exceptional Setup'
 }
 
+function getNearestDistancePercent(currentPrice, levels = []) {
+  if (!Number.isFinite(currentPrice) || !Array.isArray(levels) || !levels.length) return null
+
+  const distances = levels
+    .filter(Number.isFinite)
+    .map((level) => Math.abs(currentPrice - level) / currentPrice * 100)
+
+  return distances.length ? Math.min(...distances) : null
+}
+
+function isSupportNearby(keyPriceZones) {
+  const distance = getNearestDistancePercent(keyPriceZones?.currentPrice, keyPriceZones?.supportLevels)
+  return Number.isFinite(distance) && distance <= 4
+}
+
+function isResistanceNearby(keyPriceZones) {
+  const distance = getNearestDistancePercent(keyPriceZones?.currentPrice, keyPriceZones?.resistanceLevels)
+  return Number.isFinite(distance) && distance <= 4
+}
+
+function getDecisionPosture(data, riskLevel) {
+  const signalScore = data.marketSignal?.score ?? 50
+  const trend = `${data.technicalAnalysis?.trend || data.marketStructure?.trend || ''}`.toLowerCase()
+  const regime = `${data.marketStructure?.regime || ''}`.toLowerCase()
+  const momentum = `${data.technicalAnalysis?.momentum || data.marketStructure?.momentum || ''}`.toLowerCase()
+  const momentumScore = data.technicalAnalysis?.momentumScore ?? 50
+  const improvingMomentum = momentum === 'positive' || momentumScore >= 60
+  const bearishStructure = trend.includes('bearish') || regime.includes('correction') || regime.includes('capitulation') || regime.includes('distribution')
+  const elevatedFear = (data.fearGreedIndex?.score ?? 50) <= 30
+
+  if (isResistanceNearby(data.keyPriceZones) && improvingMomentum) return 'Breakout Watch'
+  if (elevatedFear && isSupportNearby(data.keyPriceZones) && improvingMomentum) return 'Opportunistic'
+  if (signalScore < 45 || bearishStructure || riskLevel === 'High') return 'Defensive'
+  if (signalScore <= 60 || momentum === 'neutral') return 'Neutral'
+  return 'Opportunistic'
+}
+
+function buildFallbackDecisionBrief(symbol, data, intelligenceScore, riskAssessment, opportunityAssessment, recommendedAction) {
+  const premiumValue = parsePremiumValue(data.premiumIndex?.value)
+  const posture = getDecisionPosture(data, riskAssessment.level)
+  const regime = data.marketStructure?.regime || 'Neutral'
+  const trend = data.technicalAnalysis?.trend || data.marketStructure?.trend || 'Neutral'
+  const momentum = data.technicalAnalysis?.momentum || data.marketStructure?.momentum || 'Neutral'
+  const sentiment = data.fearGreedIndex?.category || 'Sentiment Pending'
+  const keyRisks = [
+    data.technicalAnalysis?.momentum === 'Negative' ? 'Weak momentum' : null,
+    Number.isFinite(premiumValue) && premiumValue < -0.01 ? 'Premium demand is negative' : null,
+    `${data.technicalAnalysis?.priceVsSma20 || ''}`.includes('Below') ? 'Price remains below SMA20' : null,
+    isResistanceNearby(data.keyPriceZones) ? 'Resistance is holding' : null,
+  ].filter(Boolean)
+  const opportunities = [
+    (data.fearGreedIndex?.score ?? 50) <= 30 ? 'Fear is elevated' : null,
+    Array.isArray(data.keyPriceZones?.supportLevels) ? 'Support zone is nearby' : null,
+    data.technicalAnalysis?.momentum === 'Positive' ? 'Momentum is improving' : null,
+    data.marketStructure?.regime === 'Accumulation' || data.technicalAnalysis?.trendBias === 'neutral' ? 'Price is stabilizing near key levels' : null,
+  ].filter(Boolean)
+
+  return {
+    posture,
+    marketStory: `${symbol} shows a ${regime.toLowerCase()} structure with ${trend.toLowerCase()} trend conditions and ${momentum.toLowerCase()} momentum. ${sentiment} provides context, but confirmation still matters before the outlook improves.`,
+    suggestedApproach: posture === 'Defensive'
+      ? 'Reduce risk if support fails.'
+      : posture === 'Opportunistic'
+        ? 'Favor staged accumulation only near key support.'
+        : posture === 'Breakout Watch'
+          ? 'Hold core exposure and avoid chasing strength.'
+          : 'Maintain a neutral stance until the signal improves.',
+    keyRisks: (keyRisks.length ? keyRisks : riskAssessment.riskFactors.map((risk) => risk.replace(/\.$/, ''))).slice(0, 4),
+    opportunities: (opportunities.length ? opportunities : opportunityAssessment.opportunities.map((item) => item.replace(/\.$/, ''))).slice(0, 4),
+    whyThisOutlook: [
+      `Market Signal is ${data.marketSignal?.label || data.marketSignal?.status || 'pending'}.`,
+      `Market Structure is ${regime}.`,
+      `Fear & Greed is ${sentiment}.`,
+      Number.isFinite(premiumValue) && premiumValue < 0 ? 'Premium demand remains weak.' : 'Premium demand is balanced.',
+      data.technicalAnalysis?.priceVsSma20 ? `Price is ${data.technicalAnalysis.priceVsSma20}.` : null,
+    ].filter(Boolean).slice(0, 5),
+    confidenceLabel: data.signalConfidence?.label || intelligenceScore.label,
+  }
+}
+
 function buildFallbackAiNarrative(symbol, data) {
   const premiumValue = parsePremiumValue(data.premiumIndex?.value)
   const sevenDayChange = parsePercent(data.historicalPerformance?.change7d)
@@ -1003,6 +1083,29 @@ function buildFallbackAiNarrative(symbol, data) {
           ? 'Hold'
           : 'Neutral Stance'
 
+  const riskAssessment = {
+    level: riskLevel,
+    summary: `${riskLevel} risk profile based on volatility, trend quality, premium demand, sentiment, and recent performance.`,
+    riskFactors: [
+      data.technicalAnalysis?.volatility === 'High' ? 'Elevated volatility can increase short-term drawdown risk.' : 'Volatility remains a key monitoring point.',
+      data.technicalAnalysis?.momentum === 'Negative' ? 'Momentum is not yet confirming a durable upside move.' : 'Momentum is not the dominant risk factor.',
+      Number.isFinite(premiumValue) && premiumValue < -0.01 ? 'Exchange premium is negative, suggesting softer demand.' : 'Premium demand is not flashing a major warning.',
+    ],
+  }
+  const opportunityAssessment = {
+    level: opportunityLevel,
+    summary: `${opportunityLevel} opportunity profile based on market signal, sentiment, structure, premium demand, and nearby support zones.`,
+    opportunities: [
+      (data.fearGreedIndex?.score ?? 50) <= 30 ? 'Washed-out sentiment can support selective accumulation near support.' : 'Sentiment is balanced enough to wait for confirmation.',
+      data.technicalAnalysis?.momentum === 'Positive' ? 'Momentum is constructive enough to monitor for continuation.' : 'Momentum needs improvement before stronger opportunity is confirmed.',
+      'Support zones provide clear areas to watch for staged entries.',
+    ],
+  }
+  const recommendedAction = {
+    action,
+    summary: `${action} is the current educational stance. Use support and resistance zones as context, and avoid treating this as financial advice.`,
+  }
+
   return {
     intelligenceScore,
     aiOutlook: {
@@ -1010,28 +1113,10 @@ function buildFallbackAiNarrative(symbol, data) {
       summary: `${symbol} shows a ${(data.marketStructure?.regime || 'Neutral').toLowerCase()} structure with ${(data.technicalAnalysis?.trend || 'Neutral').toLowerCase()} trend conditions and ${(data.technicalAnalysis?.momentum || 'Neutral').toLowerCase()} momentum.`,
       bias,
     },
-    riskAssessment: {
-      level: riskLevel,
-      summary: `${riskLevel} risk profile based on volatility, trend quality, premium demand, sentiment, and recent performance.`,
-      riskFactors: [
-        data.technicalAnalysis?.volatility === 'High' ? 'Elevated volatility can increase short-term drawdown risk.' : 'Volatility remains a key monitoring point.',
-        data.technicalAnalysis?.momentum === 'Negative' ? 'Momentum is not yet confirming a durable upside move.' : 'Momentum is not the dominant risk factor.',
-        Number.isFinite(premiumValue) && premiumValue < -0.01 ? 'Exchange premium is negative, suggesting softer demand.' : 'Premium demand is not flashing a major warning.',
-      ],
-    },
-    opportunityAssessment: {
-      level: opportunityLevel,
-      summary: `${opportunityLevel} opportunity profile based on market signal, sentiment, structure, premium demand, and nearby support zones.`,
-      opportunities: [
-        (data.fearGreedIndex?.score ?? 50) <= 30 ? 'Washed-out sentiment can support selective accumulation near support.' : 'Sentiment is balanced enough to wait for confirmation.',
-        data.technicalAnalysis?.momentum === 'Positive' ? 'Momentum is constructive enough to monitor for continuation.' : 'Momentum needs improvement before stronger opportunity is confirmed.',
-        'Support zones provide clear areas to watch for staged entries.',
-      ],
-    },
-    recommendedAction: {
-      action,
-      summary: `${action} is the current educational stance. Use support and resistance zones as context, and avoid treating this as financial advice.`,
-    },
+    riskAssessment,
+    opportunityAssessment,
+    recommendedAction,
+    aiDecisionBrief: buildFallbackDecisionBrief(symbol, data, intelligenceScore, riskAssessment, opportunityAssessment, recommendedAction),
   }
 }
 
@@ -1087,6 +1172,7 @@ Object.entries(fallbackIntelligence).forEach(([symbol, intelligence]) => {
     cryptoDashboardData[symbol].riskAssessment = aiNarrative.riskAssessment
     cryptoDashboardData[symbol].opportunityAssessment = aiNarrative.opportunityAssessment
     cryptoDashboardData[symbol].recommendedAction = aiNarrative.recommendedAction
+    cryptoDashboardData[symbol].aiDecisionBrief = aiNarrative.aiDecisionBrief
     cryptoDashboardData[symbol].outlookRows = [
       ...cryptoDashboardData[symbol].outlookRows.filter((row) => !['AI Outlook', 'AI Risk Assessment', 'AI Opportunity Assessment', 'Recommended Action'].includes(row.metric)),
       ...buildAiRows(aiNarrative),

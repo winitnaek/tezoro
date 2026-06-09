@@ -4,12 +4,13 @@ import cryptoDashboardData from '../data/cryptoDashboardData.js'
 import useRefreshCooldown from '../hooks/useRefreshCooldown.js'
 import { getMarketOutlook } from '../services/marketApi.js'
 import { getStoredTheme, storeTheme } from '../utils/themeStorage.js'
+import { getStoredViewMode, setStoredViewMode } from '../utils/viewModeStorage.js'
 import AIIntelligenceCenter from './AIIntelligenceCenter.jsx'
 import CryptoSelector from './CryptoSelector.jsx'
 import CurrentSnapshot from './CurrentSnapshot.jsx'
 import HistoricalPerformanceCards from './HistoricalPerformanceCards.jsx'
 import KeyPriceZonesChart from './KeyPriceZonesChart.jsx'
-import KeyLevelsTable from './KeyLevelsTable.jsx'
+import MarketIntelligenceSummary from './MarketIntelligenceSummary.jsx'
 import MarketStructurePanel from './MarketStructurePanel.jsx'
 import MarketSignalPanel from './MarketSignalPanel.jsx'
 import QuickTakeaways from './QuickTakeaways.jsx'
@@ -17,6 +18,7 @@ import SystemStatusCard from './SystemStatusCard.jsx'
 import TechnicalAnalysisCards from './TechnicalAnalysisCards.jsx'
 import TechnicalRatingGauge from './TechnicalRatingGauge.jsx'
 import UpgradeModal from './UpgradeModal.jsx'
+import ViewModeSelector from './ViewModeSelector.jsx'
 import tezoroLogo from '../assets/tezoro-logo.png'
 import tezoroWordmark from '../assets/tezoro-wordmark.svg'
 
@@ -27,6 +29,15 @@ const premiumFeatureEnabled = import.meta.env.VITE_PREMIUM_FEATURE_ENABLED === '
 function CryptoMarketDashboard() {
   const [selectedCrypto, setSelectedCrypto] = useState('BTC')
   const [theme, setTheme] = useState(() => getStoredTheme('dark'))
+  const [viewMode, setViewMode] = useState(() => {
+    const storedViewMode = getStoredViewMode('overview')
+    if (premiumFeatureEnabled && storedViewMode === 'pro') {
+      setStoredViewMode('overview')
+      return 'overview'
+    }
+
+    return storedViewMode
+  })
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false)
   const [premiumAssetRequested, setPremiumAssetRequested] = useState('')
   const [dashboardData, setDashboardData] = useState({
@@ -44,6 +55,30 @@ function CryptoMarketDashboard() {
     { key: 'light', label: 'Light' },
     { key: 'high-contrast', label: 'High Contrast' },
   ]
+
+  const isProLocked = premiumFeatureEnabled
+  const isProAnalysis = viewMode === 'pro' && !isProLocked
+
+  function handleSelectViewMode(nextViewMode) {
+    if (nextViewMode === 'overview') {
+      setViewMode('overview')
+      setStoredViewMode('overview')
+      return
+    }
+
+    if (nextViewMode === 'pro' && isProLocked) {
+      setViewMode('overview')
+      setStoredViewMode('overview')
+      setPremiumAssetRequested('Pro Analysis')
+      setIsUpgradeModalOpen(true)
+      return
+    }
+
+    if (nextViewMode === 'pro') {
+      setViewMode('pro')
+      setStoredViewMode('pro')
+    }
+  }
 
   async function loadMarketOutlook(symbol, { manual = false } = {}) {
     if (manual && isCoolingDown) {
@@ -102,6 +137,13 @@ function CryptoMarketDashboard() {
     storeTheme(theme)
   }, [theme])
 
+  useEffect(() => {
+    if (isProLocked && viewMode === 'pro') {
+      setViewMode('overview')
+      setStoredViewMode('overview')
+    }
+  }, [isProLocked, viewMode])
+
   const providerLabel = dashboardData.priceProvider === 'coinmarketcap'
     ? 'CoinMarketCap'
     : dashboardData.priceProvider === 'coinbase'
@@ -147,25 +189,35 @@ function CryptoMarketDashboard() {
               </div>
             </div>
 
-            <div className="theme-switcher" aria-label="Theme switcher">
-              {themeOptions.map((option) => (
-                <Badge
-                  key={option.key}
-                  pill
-                  role="button"
-                  tabIndex="0"
-                  className={`theme-pill ${theme === option.key ? 'theme-pill-active' : ''}`}
-                  onClick={() => setTheme(option.key)}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter' || event.key === ' ') {
-                      event.preventDefault()
-                      setTheme(option.key)
-                    }
-                  }}
-                >
-                  {option.label}
-                </Badge>
-              ))}
+            <div className="brand-controls">
+              <div className="brand-control-group">
+                <span className="brand-control-label">Theme</span>
+                <div className="theme-switcher" aria-label="Theme switcher">
+                  {themeOptions.map((option) => (
+                    <Badge
+                      key={option.key}
+                      pill
+                      role="button"
+                      tabIndex="0"
+                      className={`theme-pill ${theme === option.key ? 'theme-pill-active' : ''}`}
+                      onClick={() => setTheme(option.key)}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault()
+                          setTheme(option.key)
+                        }
+                      }}
+                    >
+                      {option.label}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+              <ViewModeSelector
+                viewMode={viewMode}
+                onSelectViewMode={handleSelectViewMode}
+                isProLocked={isProLocked}
+              />
             </div>
           </div>
         </section>
@@ -214,11 +266,13 @@ function CryptoMarketDashboard() {
             </div>
           </article>
 
-          <MarketSignalPanel
-            marketSignal={dashboardData.marketSignal}
-            signalConfidence={dashboardData.signalConfidence}
-            providerDiagnostics={dashboardData.providerDiagnostics}
-          />
+          {isProAnalysis && (
+            <MarketSignalPanel
+              marketSignal={dashboardData.marketSignal}
+              signalConfidence={dashboardData.signalConfidence}
+              providerDiagnostics={dashboardData.providerDiagnostics}
+            />
+          )}
         </section>
 
         {marketError && (
@@ -238,27 +292,31 @@ function CryptoMarketDashboard() {
           <CurrentSnapshot data={dashboardData} />
         </section>
 
-        <section className="market-section">
-          <h2 className="market-section-title">Historical Performance</h2>
-          <HistoricalPerformanceCards historicalPerformance={dashboardData.historicalPerformance} />
-        </section>
+        {isProAnalysis && (
+          <>
+            <section className="market-section">
+              <h2 className="market-section-title">Historical Performance</h2>
+              <HistoricalPerformanceCards historicalPerformance={dashboardData.historicalPerformance} />
+            </section>
 
-        <section className="market-section">
-          <MarketStructurePanel marketStructure={dashboardData.marketStructure} />
-        </section>
+            <section className="market-section">
+              <MarketStructurePanel marketStructure={dashboardData.marketStructure} />
+            </section>
 
-        <section className="market-section">
-          <h2 className="market-section-title">Technical Analysis</h2>
-          <TechnicalAnalysisCards technicalAnalysis={dashboardData.technicalAnalysis} />
-        </section>
+            <section className="market-section">
+              <h2 className="market-section-title">Technical Analysis</h2>
+              <TechnicalAnalysisCards technicalAnalysis={dashboardData.technicalAnalysis} />
+            </section>
 
-        <section className="market-section">
-          <TechnicalRatingGauge technicalRating={dashboardData.technicalRating} />
-        </section>
+            <section className="market-section">
+              <TechnicalRatingGauge technicalRating={dashboardData.technicalRating} />
+            </section>
 
-        <section className="market-section">
-          <KeyPriceZonesChart keyPriceZones={dashboardData.keyPriceZones} symbol={dashboardData.symbol} />
-        </section>
+            <section className="market-section">
+              <KeyPriceZonesChart keyPriceZones={dashboardData.keyPriceZones} symbol={dashboardData.symbol} />
+            </section>
+          </>
+        )}
 
         <section className="market-section">
           <Suspense fallback={<div className="loading-market-panel">Loading price history...</div>}>
@@ -273,34 +331,47 @@ function CryptoMarketDashboard() {
             riskAssessment={dashboardData.riskAssessment}
             opportunityAssessment={dashboardData.opportunityAssessment}
             recommendedAction={dashboardData.recommendedAction}
+            aiDecisionBrief={dashboardData.aiDecisionBrief}
           />
         </section>
 
-        <section className="market-section">
-          <h2 className="market-section-title">Key Levels & Outlook</h2>
-          <KeyLevelsTable
-            rows={dashboardData.outlookRows}
-            aiOutlook={dashboardData.aiOutlook}
-            riskAssessment={dashboardData.riskAssessment}
-            opportunityAssessment={dashboardData.opportunityAssessment}
-            recommendedAction={dashboardData.recommendedAction}
-          />
-        </section>
+        {isProAnalysis && (
+          <>
+            <section className="market-section">
+              <MarketIntelligenceSummary
+                rows={dashboardData.outlookRows}
+                symbol={dashboardData.symbol}
+                aiDecisionBrief={dashboardData.aiDecisionBrief}
+                aiOutlook={dashboardData.aiOutlook}
+                riskAssessment={dashboardData.riskAssessment}
+                opportunityAssessment={dashboardData.opportunityAssessment}
+                recommendedAction={dashboardData.recommendedAction}
+                keyPriceZones={dashboardData.keyPriceZones}
+                premiumIndex={dashboardData.premiumIndex}
+                fearGreedIndex={dashboardData.fearGreedIndex}
+                marketStructure={dashboardData.marketStructure}
+                technicalAnalysis={dashboardData.technicalAnalysis}
+              />
+            </section>
 
-        <section className="market-section">
-          <Suspense fallback={<div className="loading-market-panel">Loading performance comparison...</div>}>
-            <PerformanceComparison comparisonPerformance={dashboardData.comparisonPerformance} />
-          </Suspense>
-        </section>
+            <section className="market-section">
+              <Suspense fallback={<div className="loading-market-panel">Loading performance comparison...</div>}>
+                <PerformanceComparison comparisonPerformance={dashboardData.comparisonPerformance} />
+              </Suspense>
+            </section>
+          </>
+        )}
 
         <section className="market-section">
           <h2 className="market-section-title">Quick Takeaways</h2>
           <QuickTakeaways takeaways={dashboardData.takeaways} />
         </section>
 
-        <section className="market-section">
-          <SystemStatusCard providerDiagnostics={dashboardData.providerDiagnostics} />
-        </section>
+        {isProAnalysis && (
+          <section className="market-section">
+            <SystemStatusCard providerDiagnostics={dashboardData.providerDiagnostics} />
+          </section>
+        )}
 
         <Alert color="warning" className="disclaimer-alert">
           Tezoro Crypto Intelligence provides market intelligence and educational insights only, not financial advice.

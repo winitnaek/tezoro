@@ -1,0 +1,280 @@
+Tezoro Continuation Prompt: Build On Sprint 1 + Sprint 2
+
+You are working on Tezoro, an existing React/Vite + Express crypto market dashboard app.
+
+Build directly on top of the completed work described below.
+
+Hard constraints:
+- JavaScript only
+- JSX only
+- No TypeScript
+- No routing
+- No authentication
+- No Stripe
+- No MongoDB
+- No chatbot
+- No external LLM API
+- No OpenAI/Gemini/Claude calls
+- Keep Tezoro educational/informational, not financial advice
+- Keep future changes additive and tightly scoped
+
+Completed Sprint 1: View Mode + Pro Analysis Premium Gate
+
+1. Dashboard View Mode was added.
+   - Modes:
+     - overview
+     - pro
+   - Default mode is Overview.
+   - Selected mode persists in localStorage.
+   - Storage utility:
+     - src/utils/viewModeStorage.js
+   - If Pro Analysis was previously stored but premium gating becomes active, the app falls back to Overview.
+
+2. Pro Analysis premium gate was added.
+   - Uses existing Vite flag:
+     VITE_PREMIUM_FEATURE_ENABLED
+   - Interpretation:
+     VITE_PREMIUM_FEATURE_ENABLED=true means premium gating is active.
+   - For now, there is no paid-user state.
+   - When gating is active:
+     - Overview is available.
+     - Pro Analysis is locked.
+     - Clicking locked Pro Analysis opens the existing UpgradeModal.
+     - Clicking locked Pro Analysis does not switch view mode.
+   - No duplicate modal was created.
+   - No Stripe/auth/subscription logic was added.
+
+3. View Mode selector component was added.
+   - File:
+     - src/components/ViewModeSelector.jsx
+   - Uses Reactstrap ButtonGroup style.
+   - Renders:
+     - Overview
+     - Pro Analysis with lock icon when locked
+   - Uses the same lock-icon pattern/class as premium crypto buttons:
+     - crypto-lock-icon
+   - Includes aria-pressed selected state.
+
+4. CryptoMarketDashboard was updated.
+   - File:
+     - src/components/CryptoMarketDashboard.jsx
+   - Added viewMode state and handler.
+   - Reuses UpgradeModal.
+   - Passes aiDecisionBrief to AIIntelligenceCenter after Sprint 2.
+   - Does not change existing crypto selector behavior.
+
+5. View mode rendering rules.
+   - Overview renders:
+     - Market Outlook Card
+     - Current Snapshot
+     - Price History Chart
+     - AI Intelligence Center
+     - Quick Takeaways
+     - Disclaimer
+   - Pro Analysis renders full dashboard:
+     - Market Outlook Card
+     - Calculated Market Signal Card
+     - Current Snapshot
+     - Historical Performance
+     - Market Structure
+     - Technical Analysis
+     - Technical Rating Summary
+     - Key Price Zones
+     - Price History Chart
+     - AI Intelligence Center
+     - Key Levels & Outlook
+     - Performance Comparison
+     - System Status
+     - Quick Takeaways
+     - Disclaimer
+   - AI Intelligence Center appears in both modes.
+   - Do not duplicate or move AI Intelligence Center unless explicitly requested.
+
+6. Header layout and styles were updated.
+   - Desktop/browser layout:
+     - Brand lockup remains left.
+     - View Mode is on the same row as brand lockup.
+     - Theme is right-aligned.
+     - A full-height vertical divider appears between View Mode and Theme.
+   - Mobile layout:
+     - Keeps stacked centered layout.
+     - Divider is hidden on mobile.
+   - Theme and View Mode labels:
+     - font-size: 10px
+     - letter-spacing: 1.5px
+     - opacity: 0.7
+   - Theme label has desktop-only padding-left: 55px and resets to 0 on mobile.
+   - Selected View Mode has stronger active styling and a small leading dot.
+
+7. Preserved Sprint 1 behavior.
+   - Tezoro branding preserved.
+   - Existing dashboard layout preserved outside view-mode gating.
+   - Existing crypto selector behavior preserved.
+   - BTC/ETH/AVAX/DOGE/XRP/LTC selector order preserved.
+   - LTC remains last.
+   - Existing fallback behavior preserved.
+   - No backend changes were required for Sprint 1.
+
+Completed Sprint 2: Improve AI Intelligence Center
+
+1. Deterministic AI decision brief was added.
+   - Backend engine:
+     - backend/src/engine/aiNarrativeEngine.js
+   - New field:
+     aiDecisionBrief
+   - Shape:
+     aiDecisionBrief: {
+       posture,
+       marketStory,
+       suggestedApproach,
+       keyRisks,
+       opportunities,
+       whyThisOutlook,
+       confidenceLabel
+     }
+   - Allowed posture values:
+     - Defensive
+     - Neutral
+     - Opportunistic
+     - Breakout Watch
+   - Logic is deterministic and uses existing dashboard data only.
+   - No external AI API was added.
+
+2. Backend API enrichment was updated.
+   - File:
+     - backend/src/engine/outlookEngine.js
+   - API response now includes:
+     - aiDecisionBrief
+   - Existing AI fields were preserved:
+     - intelligenceScore
+     - aiOutlook
+     - riskAssessment
+     - opportunityAssessment
+     - recommendedAction
+
+3. Fallback data was updated.
+   - Backend fallback:
+     - backend/src/data/fallbackMarketData.js
+   - Frontend fallback:
+     - src/data/cryptoDashboardData.js
+   - All supported cryptos include aiDecisionBrief:
+     - BTC
+     - ETH
+     - AVAX
+     - DOGE
+     - XRP
+     - LTC
+   - LTC remains included and last where order matters.
+
+4. AI Intelligence Center was redesigned.
+   - File:
+     - src/components/AIIntelligenceCenter.jsx
+   - New structure:
+     - Header: AI Intelligence Center
+     - Top summary:
+       - Intelligence Score
+       - Posture badge
+       - Confidence label
+     - Main sections:
+       - Market Story
+       - Suggested Approach
+       - Key Risks
+       - Opportunities
+       - Why This Outlook
+   - Uses aiDecisionBrief when available.
+   - Gracefully falls back to existing fields when aiDecisionBrief is missing:
+     - aiOutlook
+     - riskAssessment
+     - opportunityAssessment
+     - recommendedAction
+   - Does not crash if partial AI data is missing.
+
+5. AI Intelligence Center styling was updated.
+   - File:
+     - src/styles/app.css
+   - Added/updated classes include:
+     - ai-decision-card
+     - ai-decision-header
+     - ai-score-panel
+     - ai-score-value
+     - ai-posture-badge
+     - ai-confidence-label
+     - ai-market-story
+     - ai-action-callout
+     - ai-risk-opportunity-grid
+     - ai-risk-list
+     - ai-opportunity-list
+     - ai-why-list
+     - ai-decision-muted
+   - Supports:
+     - Dark theme
+     - Light theme
+     - High Contrast theme
+   - Desktop layout:
+     - Top score/posture row
+     - Market Story full width
+     - Suggested Approach highlighted callout
+     - Key Risks and Opportunities side by side
+     - Why This Outlook compact full-width bullet list
+   - Mobile layout:
+     - Stacks vertically
+     - Keeps spacing tight
+
+6. Preserved Sprint 2 behavior.
+   - View Mode behavior unchanged.
+   - Pro Analysis locking unchanged.
+   - Theme selector unchanged.
+   - Premium crypto gating unchanged.
+   - BTC default behavior unchanged.
+   - LTC last selector position unchanged.
+   - Existing dashboard data flow preserved.
+   - Existing fallback behavior preserved.
+   - No auth, Stripe, routing, MongoDB, alerts, portfolio, chatbot, or external AI API added.
+
+Tests updated so far:
+- Frontend source tests:
+  - tests/frontend/components.test.js
+- Backend engine tests:
+  - backend/tests/engines.test.js
+
+Current verification status:
+- npm test passed
+- npm run build passed
+- cd backend && npm test passed
+- The Vite production build still reports the existing chunk-size warning.
+
+Current important files:
+- src/components/CryptoMarketDashboard.jsx
+- src/components/ViewModeSelector.jsx
+- src/components/AIIntelligenceCenter.jsx
+- src/utils/viewModeStorage.js
+- src/data/cryptoDashboardData.js
+- src/styles/app.css
+- backend/src/engine/aiNarrativeEngine.js
+- backend/src/engine/outlookEngine.js
+- backend/src/data/fallbackMarketData.js
+- tests/frontend/components.test.js
+- backend/tests/engines.test.js
+
+When building the next feature:
+- Read the relevant existing files first.
+- Preserve Sprint 1 View Mode and premium gating behavior.
+- Preserve Sprint 2 AI decision brief behavior.
+- Preserve existing crypto selector order:
+  BTC, ETH, AVAX, DOGE, XRP, LTC
+- Keep LTC last.
+- Preserve fallback behavior.
+- Keep changes additive and tightly scoped.
+- Update lightweight tests using the existing node:test approach.
+- Run:
+  npm test
+  npm run build
+  cd backend
+  npm test
+
+Expected response after future work:
+- List new files, if any.
+- List updated files.
+- Briefly explain what changed.
+- Confirm tests/build status.
+- Confirm no TypeScript, auth, Stripe, routing, MongoDB, chatbot, or external AI API was added unless explicitly requested.

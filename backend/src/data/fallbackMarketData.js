@@ -692,6 +692,7 @@ Object.entries(fallbackIntelligence).forEach(([symbol, intelligence]) => {
     fallbackMarketData[symbol].riskAssessment = aiNarrative.riskAssessment;
     fallbackMarketData[symbol].opportunityAssessment = aiNarrative.opportunityAssessment;
     fallbackMarketData[symbol].recommendedAction = aiNarrative.recommendedAction;
+    fallbackMarketData[symbol].aiDecisionBrief = aiNarrative.aiDecisionBrief;
     fallbackMarketData[symbol].outlookRows = [
       ...fallbackMarketData[symbol].outlookRows.filter((row) => !['AI Outlook', 'AI Risk Assessment', 'AI Opportunity Assessment', 'Recommended Action'].includes(row.metric)),
       ...buildAiRows(aiNarrative)

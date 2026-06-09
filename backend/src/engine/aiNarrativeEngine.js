@@ -181,6 +181,187 @@ function buildOpportunities({ fearGreedIndex, historicalPerformance, technicalAn
   return opportunities.length ? opportunities.slice(0, 4) : ['Opportunity is limited until price action and demand signals improve.'];
 }
 
+function getNearestDistancePercent(currentPrice, levels = []) {
+  if (!Number.isFinite(currentPrice) || !Array.isArray(levels) || !levels.length) {
+    return null;
+  }
+
+  const distances = levels
+    .filter(Number.isFinite)
+    .map((level) => Math.abs(currentPrice - level) / currentPrice * 100);
+
+  if (!distances.length) {
+    return null;
+  }
+
+  return Math.min(...distances);
+}
+
+function isSupportNearby(keyPriceZones) {
+  const distance = getNearestDistancePercent(keyPriceZones?.currentPrice, keyPriceZones?.supportLevels);
+  return Number.isFinite(distance) && distance <= 4;
+}
+
+function isResistanceNearby(keyPriceZones) {
+  const distance = getNearestDistancePercent(keyPriceZones?.currentPrice, keyPriceZones?.resistanceLevels);
+  return Number.isFinite(distance) && distance <= 4;
+}
+
+function getDecisionPosture({ marketSignal, fearGreedIndex, riskLevel, marketStructure, technicalAnalysis, keyPriceZones }) {
+  const signalScore = marketSignal?.score ?? 50;
+  const trend = `${technicalAnalysis?.trend || marketStructure?.trend || ''}`.toLowerCase();
+  const regime = `${marketStructure?.regime || ''}`.toLowerCase();
+  const momentumScore = technicalAnalysis?.momentumScore ?? 50;
+  const momentum = `${technicalAnalysis?.momentum || marketStructure?.momentum || ''}`.toLowerCase();
+  const improvingMomentum = momentum === 'positive' || momentumScore >= 60;
+  const bearishStructure = trend.includes('bearish') || regime.includes('correction') || regime.includes('capitulation') || regime.includes('distribution');
+  const elevatedFear = (fearGreedIndex?.score ?? 50) <= 30;
+
+  if (isResistanceNearby(keyPriceZones) && improvingMomentum) {
+    return 'Breakout Watch';
+  }
+
+  if (elevatedFear && isSupportNearby(keyPriceZones) && improvingMomentum) {
+    return 'Opportunistic';
+  }
+
+  if (signalScore < 45 || bearishStructure || riskLevel === 'High') {
+    return 'Defensive';
+  }
+
+  if (signalScore <= 60 || momentum === 'neutral') {
+    return 'Neutral';
+  }
+
+  return 'Opportunistic';
+}
+
+function getSuggestedApproach(posture, riskLevel, marketStructure, technicalAnalysis) {
+  if (posture === 'Defensive') {
+    return riskLevel === 'High' ? 'Reduce risk if support fails.' : 'Wait for confirmation near support.';
+  }
+
+  if (posture === 'Opportunistic') {
+    return 'Favor staged accumulation only near key support.';
+  }
+
+  if (posture === 'Breakout Watch') {
+    return 'Hold core exposure and avoid chasing strength.';
+  }
+
+  if (['Accumulation', 'Correction'].includes(marketStructure?.regime) || technicalAnalysis?.momentum === 'Neutral') {
+    return 'Maintain a neutral stance until the signal improves.';
+  }
+
+  return 'Wait for confirmation near support.';
+}
+
+function buildDecisionBullets({ fearGreedIndex, marketSignal, marketStructure, technicalAnalysis, premiumIndex, keyPriceZones }, riskFactors, opportunities) {
+  const premiumValue = parsePremiumValue(premiumIndex?.value);
+  const risks = [];
+  const opportunityBullets = [];
+  const why = [];
+
+  if (technicalAnalysis?.momentum === 'Negative' || (technicalAnalysis?.momentumScore ?? 50) < 45) {
+    risks.push('Weak momentum');
+  }
+
+  if (Number.isFinite(premiumValue) && premiumValue < -0.01) {
+    risks.push('Premium demand is negative');
+  }
+
+  if (`${technicalAnalysis?.priceVsSma20 || ''}`.includes('Below')) {
+    risks.push('Price remains below SMA20');
+  }
+
+  if (isResistanceNearby(keyPriceZones)) {
+    risks.push('Resistance is holding');
+  }
+
+  if ((fearGreedIndex?.score ?? 50) <= 30) {
+    opportunityBullets.push('Fear is elevated');
+  }
+
+  if (isSupportNearby(keyPriceZones) || Array.isArray(keyPriceZones?.supportLevels)) {
+    opportunityBullets.push('Support zone is nearby');
+  }
+
+  if (technicalAnalysis?.momentum === 'Positive' || (technicalAnalysis?.momentumScore ?? 50) >= 60) {
+    opportunityBullets.push('Momentum is improving');
+  }
+
+  if (marketStructure?.regime === 'Accumulation' || technicalAnalysis?.trendBias === 'neutral') {
+    opportunityBullets.push('Price is stabilizing near key levels');
+  }
+
+  why.push(`Market Signal is ${marketSignal?.label || marketSignal?.status || 'pending'}.`);
+  why.push(`Market Structure is ${marketStructure?.regime || 'Neutral'}.`);
+  why.push(`Fear & Greed is ${fearGreedIndex?.category || 'Pending'}.`);
+
+  if (Number.isFinite(premiumValue)) {
+    why.push(premiumValue < 0 ? 'Premium demand remains weak.' : premiumValue > 0 ? 'Premium demand is constructive.' : 'Premium demand is balanced.');
+  }
+
+  if (technicalAnalysis?.priceVsSma20) {
+    why.push(`Price is ${technicalAnalysis.priceVsSma20}.`);
+  }
+
+  return {
+    keyRisks: (risks.length ? risks : riskFactors.map((factor) => factor.replace(/\.$/, ''))).slice(0, 4),
+    opportunities: (opportunityBullets.length ? opportunityBullets : opportunities.map((item) => item.replace(/\.$/, ''))).slice(0, 4),
+    whyThisOutlook: why.slice(0, 5)
+  };
+}
+
+function buildMarketStory(symbol, posture, marketStructure, technicalAnalysis, fearGreedIndex, signalConfidence) {
+  const regime = marketStructure?.regime || 'neutral';
+  const trend = technicalAnalysis?.trend || marketStructure?.trend || 'neutral';
+  const momentum = technicalAnalysis?.momentum || marketStructure?.momentum || 'neutral';
+  const sentiment = fearGreedIndex?.category || 'sentiment';
+  const confirmation = signalConfidence?.label || 'moderate confidence';
+
+  if (posture === 'Defensive') {
+    return `${symbol} remains under pressure as ${trend.toLowerCase()} trend conditions and ${momentum.toLowerCase()} momentum limit confirmation. ${sentiment} can create opportunity, but the setup needs stronger confirmation before risk improves.`;
+  }
+
+  if (posture === 'Breakout Watch') {
+    return `${symbol} is testing an important area as ${momentum.toLowerCase()} momentum improves near resistance. A cleaner breakout setup still depends on follow-through and ${confirmation.toLowerCase()}.`;
+  }
+
+  if (posture === 'Opportunistic') {
+    return `${symbol} shows a selective opportunity as ${sentiment.toLowerCase()} sentiment meets nearby support and ${regime.toLowerCase()} structure. Confirmation still matters, so the setup is better suited to staged decisions than chasing strength.`;
+  }
+
+  return `${symbol} is showing a balanced setup with ${regime.toLowerCase()} structure and ${momentum.toLowerCase()} momentum. The outlook remains neutral until market signal and confirmation improve.`;
+}
+
+function buildAiDecisionBrief(input, intelligenceScore, riskAssessment, opportunityAssessment, recommendedAction) {
+  const posture = getDecisionPosture({
+    ...input,
+    riskLevel: riskAssessment.level
+  });
+  const marketStory = buildMarketStory(
+    input.symbol,
+    posture,
+    input.marketStructure,
+    input.technicalAnalysis,
+    input.fearGreedIndex,
+    input.signalConfidence
+  );
+  const suggestedApproach = getSuggestedApproach(posture, riskAssessment.level, input.marketStructure, input.technicalAnalysis);
+  const bullets = buildDecisionBullets(input, riskAssessment.riskFactors, opportunityAssessment.opportunities);
+
+  return {
+    posture,
+    marketStory,
+    suggestedApproach: suggestedApproach || recommendedAction.summary,
+    keyRisks: bullets.keyRisks,
+    opportunities: bullets.opportunities,
+    whyThisOutlook: bullets.whyThisOutlook,
+    confidenceLabel: input.signalConfidence?.label || intelligenceScore.label
+  };
+}
+
 function calculateIntelligenceScore({
   marketSignal,
   signalConfidence,
@@ -273,6 +454,21 @@ function buildAiNarrative(input) {
   const trend = technicalAnalysis?.trend || marketStructure?.trend || 'Neutral';
   const momentum = technicalAnalysis?.momentum || marketStructure?.momentum || 'Neutral';
 
+  const riskAssessment = {
+    level: riskLevel,
+    summary: `${riskLevel} risk profile based on volatility, trend quality, premium demand, sentiment, and recent performance.`,
+    riskFactors
+  };
+  const opportunityAssessment = {
+    level: opportunityLevel,
+    summary: `${opportunityLevel} opportunity profile based on market signal, sentiment, structure, premium demand, and nearby support zones.`,
+    opportunities
+  };
+  const recommendedAction = {
+    action,
+    summary: `${action} is the current educational stance. Use support and resistance zones as context, and avoid treating this as financial advice.`
+  };
+
   return {
     intelligenceScore,
     aiOutlook: {
@@ -280,20 +476,10 @@ function buildAiNarrative(input) {
       summary: `${symbol} shows a ${regime.toLowerCase()} structure with ${trend.toLowerCase()} trend conditions and ${momentum.toLowerCase()} momentum. The setup is ${bias === 'buy' ? 'constructive' : bias === 'sell' ? 'defensive' : bias === 'caution' ? 'cautious' : 'balanced'} while signal confidence remains ${signalConfidence?.label || 'moderate'}.`,
       bias
     },
-    riskAssessment: {
-      level: riskLevel,
-      summary: `${riskLevel} risk profile based on volatility, trend quality, premium demand, sentiment, and recent performance.`,
-      riskFactors
-    },
-    opportunityAssessment: {
-      level: opportunityLevel,
-      summary: `${opportunityLevel} opportunity profile based on market signal, sentiment, structure, premium demand, and nearby support zones.`,
-      opportunities
-    },
-    recommendedAction: {
-      action,
-      summary: `${action} is the current educational stance. Use support and resistance zones as context, and avoid treating this as financial advice.`
-    }
+    riskAssessment,
+    opportunityAssessment,
+    recommendedAction,
+    aiDecisionBrief: buildAiDecisionBrief(input, intelligenceScore, riskAssessment, opportunityAssessment, recommendedAction)
   };
 }
 

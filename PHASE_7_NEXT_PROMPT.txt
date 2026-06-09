@@ -1,0 +1,426 @@
+You are working on Tezoro, an existing standalone React/Vite + Express crypto market dashboard app.
+
+Use this prompt as the baseline for the next development pass. The current project already includes the completed Phase 1 through Phase 6 work plus additional Phase 7-style additions that are present in the repo.
+
+Project Location:
+- D:\W\crypto-market-dashboard
+
+Product:
+- App name: Tezoro
+- Tagline: Crypto Intelligence
+- Browser title: Tezoro | Crypto Intelligence
+- Tezoro is a premium crypto market intelligence dashboard for educational/informational market context, not financial advice.
+
+Tech Stack:
+- Frontend: React 18, Vite 5, JavaScript, JSX, Bootstrap, Reactstrap, Axios, Recharts
+- Backend: Node.js 18+, Express 4, Axios, dotenv, helmet, cors, morgan
+- Tests: node:test
+
+Hard Constraints:
+- JavaScript only.
+- JSX only.
+- Do not introduce TypeScript.
+- Do not create .ts or .tsx files.
+- Do not add tsconfig.
+- Do not add authentication unless explicitly requested.
+- Do not add routing in the frontend unless explicitly requested.
+- Do not add MongoDB or any database unless explicitly requested.
+- Do not add portfolio tracking, alerts, or chatbot functionality unless explicitly requested.
+- Do not remove local fallback data.
+- Do not break frontend fallback behavior.
+- Do not break BTC/ETH/AVAX/DOGE/XRP/LTC switching.
+- LTC must remain the last crypto selector option everywhere.
+- Keep API response shape compatible with the existing frontend.
+- Keep the dashboard educational/informational, not financial advice.
+- Keep changes additive and tightly scoped.
+- Preserve the current dashboard layout unless the task explicitly says otherwise.
+- Preserve the Tezoro brand header.
+
+Supported Cryptos:
+- BTC
+- ETH
+- AVAX
+- DOGE
+- XRP
+- LTC
+
+Default Crypto:
+- BTC
+
+Important Symbol Rule:
+- LTC must remain the last crypto selector option.
+
+Current Frontend Structure Highlights:
+- src/main.jsx
+- src/App.jsx
+- src/components/CryptoMarketDashboard.jsx
+- src/components/CryptoSelector.jsx
+- src/components/CurrentSnapshot.jsx
+- src/components/HistoricalPerformanceCards.jsx
+- src/components/MarketStructurePanel.jsx
+- src/components/TechnicalAnalysisCards.jsx
+- src/components/TechnicalRatingGauge.jsx
+- src/components/KeyPriceZonesChart.jsx
+- src/components/PriceHistoryChart.jsx
+- src/components/AIIntelligenceCenter.jsx
+- src/components/KeyLevelsTable.jsx
+- src/components/PerformanceComparison.jsx
+- src/components/QuickTakeaways.jsx
+- src/components/MarketSignalPanel.jsx
+- src/components/SystemStatusCard.jsx
+- src/components/UpgradeModal.jsx
+- src/hooks/useRefreshCooldown.js
+- src/utils/themeStorage.js
+- src/services/marketApi.js
+- src/data/cryptoDashboardData.js
+- src/styles/app.css
+
+Current Backend Structure Highlights:
+- backend/server.js
+- backend/src/app.js
+- backend/src/routes/marketRoutes.js
+- backend/src/controllers/marketController.js
+- backend/src/services/marketDataService.js
+- backend/src/services/cacheService.js
+- backend/src/services/premiumService.js
+- backend/src/services/sentimentService.js
+- backend/src/services/providerHealthService.js
+- backend/src/engine/outlookEngine.js
+- backend/src/engine/fearGreedEngine.js
+- backend/src/engine/technicalAnalysisEngine.js
+- backend/src/engine/technicalRatingEngine.js
+- backend/src/engine/supportResistanceEngine.js
+- backend/src/engine/signalScoreEngine.js
+- backend/src/engine/signalConfidenceEngine.js
+- backend/src/engine/historicalAnalyticsEngine.js
+- backend/src/engine/marketRegimeEngine.js
+- backend/src/engine/performanceComparisonEngine.js
+- backend/src/engine/aiNarrativeEngine.js
+- backend/src/data/fallbackMarketData.js
+
+Current API Endpoints:
+- GET /health
+- GET /health/providers
+- GET /market/outlook/:symbol
+
+Current Dashboard Layout:
+1. Brand Header
+2. Market Outlook Card
+3. Calculated Market Signal Card
+4. Current Snapshot
+5. Historical Performance
+6. Market Structure
+7. Technical Analysis
+8. Technical Rating Summary
+9. Key Price Zones
+10. Price History Chart
+11. AI Intelligence Center
+12. Key Levels & Outlook
+13. Performance Comparison
+14. Quick Takeaways
+15. System Status
+16. Disclaimer
+
+Preserve this layout unless explicitly requested.
+
+Current Completed Features:
+
+1. Brand Header
+- Tezoro logo image.
+- Custom Tezoro SVG wordmark.
+- Premium fintech styling.
+- Responsive desktop/mobile layout.
+- Theme switcher appears in the header using Reactstrap pill badges.
+
+2. Theme Switcher
+- Theme options:
+  - Dark
+  - Light
+  - High Contrast
+- Default theme is Dark.
+- Theme is applied through document.documentElement data-theme attribute.
+- Theme preference is persisted in localStorage via src/utils/themeStorage.js.
+- CSS variables drive theme styling.
+
+3. Crypto Selector
+- Supported selector order:
+  - BTC
+  - ETH
+  - AVAX
+  - DOGE
+  - XRP
+  - LTC
+- BTC selected by default.
+- LTC is last and must remain last.
+- Clicking a crypto fetches backend data and updates the dashboard.
+- If the backend fails, the frontend uses local fallback data.
+- Premium feature flag exists:
+  - VITE_PREMIUM_FEATURE_ENABLED=true
+- When the flag is true, ETH/AVAX/DOGE/XRP/LTC are shown as locked premium assets and open the upgrade modal instead of switching.
+- BTC remains free.
+
+4. Manual Refresh Cooldown
+- src/hooks/useRefreshCooldown.js provides a 10-second cooldown.
+- Manual refresh starts cooldown and disables the refresh button.
+- Automatic crypto switching still fetches normally.
+
+5. Frontend Data Flow
+CryptoMarketDashboard.jsx:
+- selectedCrypto state defaults to BTC.
+- theme state initializes from getStoredTheme('dark').
+- fetches backend with getMarketOutlook(selectedCrypto).
+- uses requestIdRef to avoid stale async responses overwriting newer requests.
+- shows loading state.
+- shows fallback warning if API fails.
+- uses src/data/cryptoDashboardData.js as local fallback.
+- renders lazy-loaded PriceHistoryChart and PerformanceComparison with Suspense fallbacks.
+
+6. Current Snapshot
+- Three cards:
+  - Current Price
+  - Premium Index
+  - Fear & Greed Index
+- Each card shows label, value, description, bias badge, and mini trend context.
+
+7. Historical Performance
+- Renders compact cards for 24H, 7D, 30D, 90D, and YTD.
+- Handles missing values safely.
+
+8. Market Structure
+- Classifies market regime using trend, moving averages, momentum, volatility, and price structure.
+- Possible regimes include Accumulation, Expansion, Trend, Distribution, Correction, Capitulation, Neutral.
+
+9. Technical Analysis
+- Backend calculates SMA20, SMA50, 7-day change, 30-day change, momentum, trend, volatility, and price-vs-SMA context.
+
+10. Technical Rating Summary
+Frontend:
+- src/components/TechnicalRatingGauge.jsx
+
+Backend:
+- backend/src/engine/technicalRatingEngine.js
+
+Output shape:
+technicalRating: {
+  summary,
+  oscillators,
+  movingAverages
+}
+
+Each rating bucket includes:
+- score
+- label
+- posture
+- riskOff
+- neutral
+- constructive
+- note
+
+Rating labels:
+- Strong Risk-Off
+- Risk-Off
+- Neutral
+- Constructive
+- Strong Constructive
+
+11. Key Price Zones
+- Backend calculates support/resistance zones from recent chart data.
+- Frontend renders a dedicated key price zone chart/panel.
+
+12. Price History Chart
+- Uses Recharts.
+- Range buttons:
+  - 7D
+  - 30D
+  - 90D
+  - 1Y
+- Default range is 30D.
+- Lazy-loaded to improve initial bundle behavior.
+
+13. Performance Comparison
+- Compares supported cryptos using available chart data.
+- Shows 7D and 30D performance.
+- Highlights selected crypto.
+- Display order is BTC, ETH, AVAX, DOGE, XRP, LTC.
+- Lazy-loaded to improve initial bundle behavior.
+
+14. AI Narrative Intelligence
+- Deterministic and rule-based.
+- No external LLM APIs are called.
+- Uses marketSignal, signalConfidence, fearGreedIndex, historicalPerformance, marketStructure, technicalAnalysis, premiumIndex, and keyPriceZones.
+- Generates intelligenceScore, aiOutlook, riskAssessment, opportunityAssessment, and recommendedAction.
+
+15. Key Levels AI Rows
+- Backend appends AI rows to outlookRows.
+- Frontend KeyLevelsTable has a compatibility guard to append AI rows if an older response lacks them.
+
+16. Fear & Greed
+- Uses Alternative.me Fear & Greed API when available.
+- Falls back safely.
+- Category normalization is handled by backend fearGreedEngine.js.
+
+17. Premium Index / Exchange Premium
+- Calculates live premium when providers are available.
+- Formula:
+  premiumPercent = ((coinbasePrice - globalAveragePrice) / globalAveragePrice) * 100
+- Falls back safely when live calculation fails.
+
+18. Market Data Provider Chain
+Backend provider order for current price:
+1. Coinbase spot price API
+2. CoinMarketCap quote API, if COINMARKETCAP_API_KEY exists
+3. CoinGecko simple price API
+4. Local fallback market data
+
+19. Backend Caching
+- Simple in-memory cache is implemented.
+- No Redis, MongoDB, or external cache was added.
+
+20. Provider Diagnostics
+API response includes:
+providerDiagnostics: {
+  price,
+  chart,
+  premium,
+  sentiment,
+  cache
+}
+
+21. Provider Health
+Backend:
+- backend/src/services/providerHealthService.js
+- GET /health/providers
+
+Provider health response shape:
+{
+  status: "UP",
+  providers: {
+    coingecko: "UP" | "DOWN",
+    coinbase: "UP" | "DOWN",
+    sentiment: "UP" | "DOWN",
+    cache: "UP" | "DOWN"
+  }
+}
+
+22. System Status UI
+Frontend:
+- src/components/SystemStatusCard.jsx
+
+Current behavior:
+- Displays providerDiagnostics from the current market outlook response.
+- Shows Price Provider, Premium Provider, Sentiment Provider, and Cache Status.
+
+23. Upgrade Modal
+Frontend:
+- src/components/UpgradeModal.jsx
+
+Current behavior:
+- Opens when a premium-gated asset is clicked and VITE_PREMIUM_FEATURE_ENABLED=true.
+- Lists premium assets and feature groups.
+- Shows Learn More and Close buttons.
+
+24. Tests
+Frontend:
+- npm test
+- tests/frontend/components.test.js checks premium selector, upgrade modal, and system status source text.
+
+Backend:
+- cd backend
+- npm test
+- backend/tests/providerHealthService.test.js checks provider health service behavior.
+- backend/tests/engines.test.js checks core engine behavior.
+
+Known Issues / Cleanup Candidates:
+1. src/components/UpgradeModal.jsx contains mojibake for the checkmark character:
+   - It currently renders "âœ“".
+   - Replace it with an ASCII-safe alternative such as "Included" text, a simple "+" marker, or a CSS-based indicator.
+   - Avoid introducing non-ASCII unless the file already needs it.
+
+2. SystemStatusCard currently reads only providerDiagnostics from the market outlook payload.
+   - The backend also exposes GET /health/providers.
+   - The UI should optionally fetch that endpoint and display true provider UP/DOWN health without breaking if the endpoint is unavailable.
+
+3. marketApi.js may need a small getProviderHealth() API helper.
+   - Keep existing getMarketOutlook() behavior unchanged.
+
+4. Technical rating should be present in both backend and frontend fallback data for all supported cryptos.
+   - Verify BTC/ETH/AVAX/DOGE/XRP/LTC fallback data includes technicalRating.
+
+5. Verify the Vite chunk-size warning after lazy loading.
+   - If still present, do not over-optimize unless there is an obvious low-risk Vite manualChunks improvement.
+
+Next Development Task:
+Implement the following additive improvements:
+
+1. Fix UpgradeModal mojibake.
+- Replace "âœ“" with ASCII-safe UI text or a CSS marker.
+- Keep the modal accessible and visually consistent.
+- Do not add new icon libraries.
+
+2. Add frontend provider health integration.
+- Add getProviderHealth() to src/services/marketApi.js.
+- Fetch GET /health/providers from CryptoMarketDashboard.jsx or a small focused hook/component.
+- Pass the health result into SystemStatusCard.
+- SystemStatusCard should display both:
+  - current outlook diagnostics from providerDiagnostics
+  - provider health from /health/providers when available
+- If /health/providers fails, keep rendering the existing diagnostics and show health as unavailable.
+- Do not block dashboard rendering on provider health.
+- Do not let provider health errors trigger the main market fallback warning.
+
+3. Improve SystemStatusCard.
+- Keep it compact.
+- Include the current market data diagnostics:
+  - price
+  - chart
+  - premium
+  - sentiment
+  - cache
+- Include provider health statuses:
+  - CoinGecko
+  - Coinbase
+  - Sentiment
+  - Cache
+- Use existing CSS patterns and theme variables.
+- Do not redesign the page.
+
+4. Add focused tests.
+- Update tests/frontend/components.test.js or add another lightweight node:test source check for:
+  - getProviderHealth helper exists.
+  - SystemStatusCard handles provider health labels.
+  - UpgradeModal no longer contains mojibake.
+- Update/add backend tests only if backend behavior changes.
+
+5. Verification.
+- Run:
+  npm test
+  npm run build
+  cd backend
+  npm test
+- If a command cannot run, report why.
+
+Expected Result:
+- The app still builds.
+- Frontend fallback behavior remains intact.
+- BTC remains free and default.
+- LTC remains last.
+- Premium gating behavior remains behind VITE_PREMIUM_FEATURE_ENABLED.
+- Upgrade modal text is no longer corrupted.
+- System Status gives clearer runtime provider health without breaking the dashboard.
+
+Local Run Instructions:
+Frontend:
+cd D:\W\crypto-market-dashboard
+npm run dev
+
+Backend:
+cd D:\W\crypto-market-dashboard\backend
+npm run dev
+
+Expected URLs:
+- Frontend: http://localhost:5173
+- Backend: http://localhost:3000
+- Health: http://localhost:3000/health
+- Provider Health: http://localhost:3000/health/providers
+- Market API: http://localhost:3000/market/outlook/BTC
+- LTC API: http://localhost:3000/market/outlook/LTC
