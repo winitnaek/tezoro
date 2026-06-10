@@ -1,20 +1,8 @@
 const axios = require('axios');
-const { getFearGreedCategory, getFearGreedDescription } = require('../engine/fearGreedEngine');
+const { getFearGreedCategory, getFearGreedDescription, getFearGreedSignal } = require('../engine/fearGreedEngine');
 const { getOrSetCache } = require('./cacheService');
 
 const SENTIMENT_TTL_MS = 10 * 60 * 1000;
-
-function getSentimentBias(score) {
-  if (score <= 44) {
-    return { bias: 'buy', badgeLabel: score <= 24 ? 'Contrarian Buy' : 'Selective Buy' };
-  }
-
-  if (score <= 55) {
-    return { bias: 'neutral', badgeLabel: 'Neutral' };
-  }
-
-  return { bias: 'sell', badgeLabel: score >= 75 ? 'Risk Elevated' : 'Caution' };
-}
 
 async function fetchLiveFearGreed() {
   const response = await axios.get('https://api.alternative.me/fng/', {
@@ -28,7 +16,7 @@ async function fetchLiveFearGreed() {
   }
 
   const category = getFearGreedCategory(score);
-  const { bias, badgeLabel } = getSentimentBias(score);
+  const { bias, badgeLabel } = getFearGreedSignal(score);
 
   return {
     score,

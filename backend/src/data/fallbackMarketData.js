@@ -134,7 +134,7 @@ const fallbackMarketData = {
     premiumBadge: 'Sell / Trim',
     fearScore: 22,
     fearBias: 'buy',
-    fearBadge: 'Contrarian Buy',
+    fearBadge: 'Accumulation Watch',
     priceBadge: 'Neutral-to-Buy',
     signal: {
       score: 62,
@@ -178,7 +178,7 @@ const fallbackMarketData = {
     premiumBadge: 'Caution',
     fearScore: 25,
     fearBias: 'buy',
-    fearBadge: 'Contrarian Buy',
+    fearBadge: 'Selective Buy Zone',
     priceBadge: 'Neutral',
     signal: {
       score: 66,
@@ -222,7 +222,7 @@ const fallbackMarketData = {
     premiumBadge: 'Risk-Off',
     fearScore: 24,
     fearBias: 'neutral',
-    fearBadge: 'Selective Buy',
+    fearBadge: 'Accumulation Watch',
     priceBadge: 'Neutral',
     signal: {
       score: 54,
@@ -266,7 +266,7 @@ const fallbackMarketData = {
     premiumBadge: 'Caution',
     fearScore: 23,
     fearBias: 'neutral',
-    fearBadge: 'High Risk',
+    fearBadge: 'Accumulation Watch',
     priceBadge: 'Neutral',
     signal: {
       score: 49,
@@ -310,7 +310,7 @@ const fallbackMarketData = {
     premiumBadge: 'Neutral',
     fearScore: 24,
     fearBias: 'buy',
-    fearBadge: 'Contrarian Buy',
+    fearBadge: 'Accumulation Watch',
     priceBadge: 'Neutral',
     signal: {
       score: 60,
@@ -354,7 +354,7 @@ const fallbackMarketData = {
     premiumBadge: 'Caution',
     fearScore: 26,
     fearBias: 'buy',
-    fearBadge: 'Selective Buy',
+    fearBadge: 'Selective Buy Zone',
     priceBadge: 'Neutral-to-Buy',
     signal: {
       score: 58,

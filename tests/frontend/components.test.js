@@ -44,9 +44,9 @@ test('ViewModeSelector renders overview and pro analysis states', async () => {
   assert.match(source, /Overview/)
   assert.match(source, /View Mode/)
   assert.match(source, /Pro Analysis/)
-  assert.match(source, /isProLocked/)
-  assert.match(source, /view-mode-lock-icon/)
-  assert.match(source, /view-mode-btn-locked/)
+  assert.doesNotMatch(source, /isProLocked/)
+  assert.doesNotMatch(source, /view-mode-lock-icon/)
+  assert.doesNotMatch(source, /view-mode-btn-locked/)
 })
 
 test('viewModeStorage persists only supported view modes', async () => {
@@ -58,13 +58,13 @@ test('viewModeStorage persists only supported view modes', async () => {
   assert.match(source, /setStoredViewMode\(value\)/)
 })
 
-test('CryptoMarketDashboard defaults overview and gates pro analysis through UpgradeModal', async () => {
+test('CryptoMarketDashboard defaults overview and allows pro analysis without premium gate', async () => {
   const source = await readSource('src/components/CryptoMarketDashboard.jsx')
 
   assert.match(source, /getStoredViewMode\('overview'\)/)
-  assert.match(source, /const isProLocked = premiumFeatureEnabled/)
-  assert.match(source, /setPremiumAssetRequested\('Pro Analysis'\)/)
-  assert.match(source, /setIsUpgradeModalOpen\(true\)/)
+  assert.match(source, /const isProAnalysis = viewMode === 'pro'/)
+  assert.doesNotMatch(source, /isProLocked/)
+  assert.doesNotMatch(source, /setPremiumAssetRequested\('Pro Analysis'\)/)
   assert.match(source, /<ViewModeSelector/)
   assert.match(source, /isProAnalysis &&/)
 })
@@ -120,6 +120,16 @@ test('frontend fallback data includes AI decision brief', async () => {
   assert.match(source, /const supportedSymbols = \['BTC', 'ETH', 'AVAX', 'DOGE', 'XRP', 'LTC'\]/)
   assert.match(source, /export function getCryptoDashboardFallback\(symbol\)/)
   assert.match(source, /\.\.\.buildRollingPeriod\(\)/)
+})
+
+test('frontend fallback sentiment badges use Tezoro fear and greed ranges', async () => {
+  const source = await readSource('src/data/cryptoDashboardData.js')
+
+  assert.match(source, /Accumulation Watch/)
+  assert.match(source, /Selective Buy Zone/)
+  assert.match(source, /Trim \/ Risk Watch/)
+  assert.doesNotMatch(source, /Contrarian Buy/)
+  assert.doesNotMatch(source, /Selective Buy['"]/)
 })
 
 test('frontend fallback chart dates are rolling, not fixed to an old seed date', async () => {

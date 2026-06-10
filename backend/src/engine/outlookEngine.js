@@ -1,5 +1,5 @@
 const fallbackMarketData = require('../data/fallbackMarketData');
-const { getFearGreedCategory, getFearGreedDescription } = require('./fearGreedEngine');
+const { getFearGreedCategory, getFearGreedDescription, getFearGreedSignal } = require('./fearGreedEngine');
 const { buildKeyPriceZones } = require('./supportResistanceEngine');
 const { buildAiNarrative } = require('./aiNarrativeEngine');
 const { buildHistoricalPerformance, buildPriceHistory } = require('./historicalAnalyticsEngine');
@@ -127,13 +127,16 @@ function applyFearGreedCategory(outlook) {
   const score = outlook.fearGreedIndex?.score;
   const category = getFearGreedCategory(score);
   const description = getFearGreedDescription(category);
+  const { bias, badgeLabel } = getFearGreedSignal(score);
 
   return {
     ...outlook,
     fearGreedIndex: {
       ...outlook.fearGreedIndex,
       category,
-      description
+      description,
+      bias,
+      badgeLabel
     },
     outlookRows: outlook.outlookRows.map((row) =>
       row.metric === 'Fear & Greed Index'

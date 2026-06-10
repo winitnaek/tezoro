@@ -438,16 +438,6 @@ button {
   content: "";
 }
 
-.view-mode-btn-locked {
-  border-color: rgba(148, 163, 184, 0.32) !important;
-  color: #cbd5e1 !important;
-}
-
-.view-mode-lock-icon {
-  margin-right: 0;
-  margin-left: 6px;
-}
-
 .theme-pill {
   cursor: pointer;
   user-select: none;
@@ -501,10 +491,6 @@ button {
   border-color: rgba(15, 23, 42, 0.18) !important;
   background: rgba(15, 23, 42, 0.06) !important;
   color: #334155 !important;
-}
-
-:root[data-theme="light"] .view-mode-btn-locked {
-  color: #64748b !important;
 }
 
 :root[data-theme="light"] .hero-meta-row span {

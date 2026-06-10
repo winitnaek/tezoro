@@ -30,13 +30,7 @@ function CryptoMarketDashboard() {
   const [selectedCrypto, setSelectedCrypto] = useState('BTC')
   const [theme, setTheme] = useState(() => getStoredTheme('light'))
   const [viewMode, setViewMode] = useState(() => {
-    const storedViewMode = getStoredViewMode('overview')
-    if (premiumFeatureEnabled && storedViewMode === 'pro') {
-      setStoredViewMode('overview')
-      return 'overview'
-    }
-
-    return storedViewMode
+    return getStoredViewMode('overview')
   })
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false)
   const [premiumAssetRequested, setPremiumAssetRequested] = useState('')
@@ -56,21 +50,12 @@ function CryptoMarketDashboard() {
     { key: 'high-contrast', label: 'High Contrast' },
   ]
 
-  const isProLocked = premiumFeatureEnabled
-  const isProAnalysis = viewMode === 'pro' && !isProLocked
+  const isProAnalysis = viewMode === 'pro'
 
   function handleSelectViewMode(nextViewMode) {
     if (nextViewMode === 'overview') {
       setViewMode('overview')
       setStoredViewMode('overview')
-      return
-    }
-
-    if (nextViewMode === 'pro' && isProLocked) {
-      setViewMode('overview')
-      setStoredViewMode('overview')
-      setPremiumAssetRequested('Pro Analysis')
-      setIsUpgradeModalOpen(true)
       return
     }
 
@@ -137,13 +122,6 @@ function CryptoMarketDashboard() {
     storeTheme(theme)
   }, [theme])
 
-  useEffect(() => {
-    if (isProLocked && viewMode === 'pro') {
-      setViewMode('overview')
-      setStoredViewMode('overview')
-    }
-  }, [isProLocked, viewMode])
-
   const providerLabel = dashboardData.priceProvider === 'coinmarketcap'
     ? 'CoinMarketCap'
     : dashboardData.priceProvider === 'coinbase'
@@ -152,9 +130,10 @@ function CryptoMarketDashboard() {
       ? 'CoinGecko'
       : ''
   const dataSourceLabel = dashboardData.dataSource === 'live'
-    ? `Live Data${providerLabel ? ` - ${providerLabel}` : ''}`
-    : 'Fallback Data'
+    ? `Source: Live Data${providerLabel ? ` - ${providerLabel}` : ''}`
+    : 'Source: Fallback Data'
   const confidenceLabel = dashboardData.signalConfidence?.label || 'Confidence Pending'
+  const dataReliabilityLabel = confidenceLabel.replace(/ Confidence$/, '')
   const lastUpdatedLabel = dashboardData.lastUpdated
     ? new Intl.DateTimeFormat('en-US', {
         hour: 'numeric',
@@ -216,7 +195,6 @@ function CryptoMarketDashboard() {
               <ViewModeSelector
                 viewMode={viewMode}
                 onSelectViewMode={handleSelectViewMode}
-                isProLocked={isProLocked}
               />
             </div>
           </div>
@@ -241,7 +219,7 @@ function CryptoMarketDashboard() {
                   <span className={dashboardData.dataSource === 'live' ? 'live-data-badge' : 'fallback-data-badge'}>
                     {dataSourceLabel}
                   </span>
-                  <span className="confidence-status-badge">{confidenceLabel}</span>
+                  <span className="confidence-status-badge">Data Reliability: {dataReliabilityLabel}</span>
                   <span className="updated-text">Last updated: {lastUpdatedLabel}</span>
                   <Button
                     className="refresh-btn"

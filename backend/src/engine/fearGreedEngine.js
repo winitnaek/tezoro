@@ -41,4 +41,30 @@ function getFearGreedDescription(category) {
   }
 }
 
-module.exports = { getFearGreedCategory, getFearGreedDescription };
+function getFearGreedSignal(score) {
+  const normalizedScore = Number(score);
+
+  if (!Number.isFinite(normalizedScore)) {
+    return { bias: 'neutral', badgeLabel: 'Neutral' };
+  }
+
+  if (normalizedScore <= 24) {
+    return { bias: 'buy', badgeLabel: 'Accumulation Watch' };
+  }
+
+  if (normalizedScore <= 44) {
+    return { bias: 'buy', badgeLabel: 'Selective Buy Zone' };
+  }
+
+  if (normalizedScore <= 55) {
+    return { bias: 'neutral', badgeLabel: 'Neutral' };
+  }
+
+  if (normalizedScore <= 74) {
+    return { bias: 'sell', badgeLabel: 'Caution' };
+  }
+
+  return { bias: 'sell', badgeLabel: 'Trim / Risk Watch' };
+}
+
+module.exports = { getFearGreedCategory, getFearGreedDescription, getFearGreedSignal };

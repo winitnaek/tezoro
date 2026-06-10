@@ -2,6 +2,7 @@ const assert = require('node:assert/strict');
 const test = require('node:test');
 
 const { buildAiNarrative } = require('../src/engine/aiNarrativeEngine');
+const { getFearGreedCategory, getFearGreedSignal } = require('../src/engine/fearGreedEngine');
 const { buildHistoricalPerformance } = require('../src/engine/historicalAnalyticsEngine');
 const { buildMarketStructure } = require('../src/engine/marketRegimeEngine');
 const { buildSignalConfidence } = require('../src/engine/signalConfidenceEngine');
@@ -171,6 +172,24 @@ test('fallback market data includes AI decision brief for every supported asset'
     assert.ok(fallbackMarketData[symbol].aiDecisionBrief, `${symbol} should include aiDecisionBrief`);
     assert.ok(fallbackMarketData[symbol].aiDecisionBrief.marketStory);
     assert.ok(fallbackMarketData[symbol].aiDecisionBrief.suggestedApproach);
+  });
+});
+
+test('fear and greed score maps to Tezoro sentiment badge ranges', () => {
+  const cases = [
+    [24, 'Extreme Fear', 'Accumulation Watch'],
+    [25, 'Fear', 'Selective Buy Zone'],
+    [44, 'Fear', 'Selective Buy Zone'],
+    [45, 'Neutral', 'Neutral'],
+    [55, 'Neutral', 'Neutral'],
+    [56, 'Greed', 'Caution'],
+    [74, 'Greed', 'Caution'],
+    [75, 'Extreme Greed', 'Trim / Risk Watch']
+  ];
+
+  cases.forEach(([score, category, badgeLabel]) => {
+    assert.equal(getFearGreedCategory(score), category);
+    assert.equal(getFearGreedSignal(score).badgeLabel, badgeLabel);
   });
 });
 

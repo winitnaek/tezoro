@@ -1,6 +1,6 @@
 import { Button, ButtonGroup } from 'reactstrap'
 
-function ViewModeSelector({ viewMode, onSelectViewMode, isProLocked }) {
+function ViewModeSelector({ viewMode, onSelectViewMode }) {
   return (
     <div className="view-mode-selector" aria-label="View mode selector">
       <span className="view-mode-label">View Mode</span>
@@ -16,7 +16,7 @@ function ViewModeSelector({ viewMode, onSelectViewMode, isProLocked }) {
           Overview
         </Button>
         <Button
-          className={`view-mode-btn ${viewMode === 'pro' ? 'view-mode-btn-active' : ''} ${isProLocked ? 'view-mode-btn-locked' : ''}`}
+          className={`view-mode-btn ${viewMode === 'pro' ? 'view-mode-btn-active' : ''}`}
           color="light"
           outline={viewMode !== 'pro'}
           active={viewMode === 'pro'}
@@ -24,11 +24,6 @@ function ViewModeSelector({ viewMode, onSelectViewMode, isProLocked }) {
           onClick={() => onSelectViewMode('pro')}
         >
           Pro Analysis
-          {isProLocked && (
-            <span className="crypto-lock-icon view-mode-lock-icon" aria-label="Premium view">
-              🔒
-            </span>
-          )}
         </Button>
       </ButtonGroup>
     </div>

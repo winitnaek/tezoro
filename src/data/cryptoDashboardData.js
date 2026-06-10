@@ -22,6 +22,28 @@ function buildRollingPeriod(date = new Date()) {
   }
 }
 
+function getFearGreedCategory(score) {
+  const normalizedScore = Number(score)
+
+  if (!Number.isFinite(normalizedScore)) return 'Neutral'
+  if (normalizedScore <= 24) return 'Extreme Fear'
+  if (normalizedScore <= 44) return 'Fear'
+  if (normalizedScore <= 55) return 'Neutral'
+  if (normalizedScore <= 74) return 'Greed'
+  return 'Extreme Greed'
+}
+
+function getFearGreedSignal(score) {
+  const normalizedScore = Number(score)
+
+  if (!Number.isFinite(normalizedScore)) return { bias: 'neutral', badgeLabel: 'Neutral' }
+  if (normalizedScore <= 24) return { bias: 'buy', badgeLabel: 'Accumulation Watch' }
+  if (normalizedScore <= 44) return { bias: 'buy', badgeLabel: 'Selective Buy Zone' }
+  if (normalizedScore <= 55) return { bias: 'neutral', badgeLabel: 'Neutral' }
+  if (normalizedScore <= 74) return { bias: 'sell', badgeLabel: 'Caution' }
+  return { bias: 'sell', badgeLabel: 'Trim / Risk Watch' }
+}
+
 const cryptoDashboardData = {
   BTC: {
     symbol: "BTC",
@@ -40,7 +62,7 @@ const cryptoDashboardData = {
       category: "Extreme Fear",
       description: "Extreme Fear often signals long-term buying opportunities. Consider accumulating gradually near support levels instead of entering all at once.",
       bias: "buy",
-      badgeLabel: "Contrarian Buy",
+      badgeLabel: "Accumulation Watch",
     },
     priceBias: {
       bias: "neutral",
@@ -85,7 +107,7 @@ const cryptoDashboardData = {
       {
         metric: "Fear & Greed Index",
         details: "22 - Extreme Fear",
-        interpretation: "Contrarian Buy bias: fear favors accumulation, but only in gradual layers.",
+        interpretation: "Accumulation Watch: fear favors gradual accumulation, but only in measured layers.",
         bias: "buy",
       },
       {
@@ -137,7 +159,7 @@ const cryptoDashboardData = {
       category: "Extreme Fear",
       description: "Extreme Fear often signals long-term buying opportunities. Consider accumulating gradually near support levels instead of entering all at once.",
       bias: "buy",
-      badgeLabel: "Contrarian Buy",
+      badgeLabel: "Selective Buy Zone",
     },
     priceBias: {
       bias: "neutral",
@@ -182,7 +204,7 @@ const cryptoDashboardData = {
       {
         metric: "Fear & Greed Index",
         details: "25 - Extreme Fear",
-        interpretation: "Contrarian Buy bias: fear is supportive, but confirmation is needed.",
+        interpretation: "Selective Buy Zone: fear is supportive, but confirmation is needed.",
         bias: "buy",
       },
       {
@@ -234,7 +256,7 @@ const cryptoDashboardData = {
       category: "Extreme Fear",
       description: "Extreme Fear often signals long-term buying opportunities. Consider accumulating gradually near support levels instead of entering all at once.",
       bias: "neutral",
-      badgeLabel: "Selective Buy",
+      badgeLabel: "Accumulation Watch",
     },
     priceBias: {
       bias: "neutral",
@@ -279,7 +301,7 @@ const cryptoDashboardData = {
       {
         metric: "Fear & Greed Index",
         details: "24 - Extreme Fear",
-        interpretation: "Selective Buy bias: accumulation only makes sense near strong support.",
+        interpretation: "Accumulation Watch: accumulation only makes sense near strong support.",
         bias: "buy",
       },
       {
@@ -331,7 +353,7 @@ const cryptoDashboardData = {
       category: "Extreme Fear",
       description: "Extreme Fear often signals long-term buying opportunities. Consider accumulating gradually near support levels instead of entering all at once.",
       bias: "neutral",
-      badgeLabel: "High Risk",
+      badgeLabel: "Accumulation Watch",
     },
     priceBias: {
       bias: "neutral",
@@ -428,7 +450,7 @@ const cryptoDashboardData = {
       category: "Extreme Fear",
       description: "Extreme Fear often signals long-term buying opportunities. Consider accumulating gradually near support levels instead of entering all at once.",
       bias: "buy",
-      badgeLabel: "Contrarian Buy",
+      badgeLabel: "Accumulation Watch",
     },
     priceBias: {
       bias: "neutral",
@@ -473,7 +495,7 @@ const cryptoDashboardData = {
       {
         metric: "Fear & Greed Index",
         details: "24 - Extreme Fear",
-        interpretation: "Contrarian Buy bias: sentiment is washed out but confirmation matters.",
+        interpretation: "Accumulation Watch: sentiment is washed out but confirmation matters.",
         bias: "buy",
       },
       {
@@ -525,7 +547,7 @@ const cryptoDashboardData = {
       category: "Fear",
       description: "Fear suggests caution, but it can create selective buying opportunities if price is near support and risk is managed.",
       bias: "buy",
-      badgeLabel: "Selective Buy",
+      badgeLabel: "Selective Buy Zone",
     },
     priceBias: {
       bias: "neutral",
@@ -570,7 +592,7 @@ const cryptoDashboardData = {
       {
         metric: "Fear & Greed Index",
         details: "26 - Fear",
-        interpretation: "Selective Buy bias: fear helps, but support confirmation matters.",
+        interpretation: "Selective Buy Zone: fear helps, but support confirmation matters.",
         bias: "buy",
       },
       {
@@ -1190,9 +1212,27 @@ Object.entries(fallbackIntelligence).forEach(([symbol, intelligence]) => {
 })
 
 export function getCryptoDashboardFallback(symbol) {
+  const fallback = cryptoDashboardData[symbol]
+  const fearGreedScore = fallback.fearGreedIndex?.score
+  const fearGreedCategory = getFearGreedCategory(fearGreedScore)
+  const fearGreedSignal = getFearGreedSignal(fearGreedScore)
+
   return {
-    ...cryptoDashboardData[symbol],
+    ...fallback,
     ...buildRollingPeriod(),
+    fearGreedIndex: {
+      ...fallback.fearGreedIndex,
+      ...fearGreedSignal,
+      category: fearGreedCategory,
+    },
+    outlookRows: fallback.outlookRows.map((row) =>
+      row.metric === 'Fear & Greed Index'
+        ? {
+            ...row,
+            details: `${fearGreedScore} - ${fearGreedCategory}`,
+          }
+        : row
+    ),
   }
 }
 
