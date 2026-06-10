@@ -118,6 +118,15 @@ test('frontend fallback data includes AI decision brief', async () => {
   assert.match(source, /aiDecisionBrief/)
   assert.match(source, /buildFallbackDecisionBrief/)
   assert.match(source, /const supportedSymbols = \['BTC', 'ETH', 'AVAX', 'DOGE', 'XRP', 'LTC'\]/)
+  assert.match(source, /export function getCryptoDashboardFallback\(symbol\)/)
+  assert.match(source, /\.\.\.buildRollingPeriod\(\)/)
+})
+
+test('frontend fallback chart dates are rolling, not fixed to an old seed date', async () => {
+  const source = await readSource('src/data/cryptoDashboardData.js')
+
+  assert.match(source, /const endDate = Date\.UTC\(today\.getUTCFullYear\(\), today\.getUTCMonth\(\), today\.getUTCDate\(\)\)/)
+  assert.doesNotMatch(source, /Date\.UTC\(2025,\s*5,\s*1\)/)
 })
 
 test('SystemStatusCard renders diagnostics labels', async () => {
@@ -127,4 +136,12 @@ test('SystemStatusCard renders diagnostics labels', async () => {
   assert.match(source, /Premium Provider/)
   assert.match(source, /Sentiment Provider/)
   assert.match(source, /Cache Status/)
+})
+
+test('CryptoMarketDashboard refreshes fallback outlook dates when fallback data is used', async () => {
+  const source = await readSource('src/components/CryptoMarketDashboard.jsx')
+
+  assert.match(source, /getCryptoDashboardFallback\('BTC'\)/)
+  assert.match(source, /getCryptoDashboardFallback\(symbol\)/)
+  assert.doesNotMatch(source, /cryptoDashboardData\[symbol\]/)
 })

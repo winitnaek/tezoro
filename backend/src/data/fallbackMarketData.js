@@ -562,7 +562,9 @@ function parsePercent(value) {
 function buildFallbackSeries(currentPrice, rangeLow, rangeHigh, days = 365) {
   const low = Number.isFinite(rangeLow) ? rangeLow : currentPrice * 0.9;
   const high = Number.isFinite(rangeHigh) ? rangeHigh : currentPrice * 1.1;
-  const startDate = Date.UTC(2025, 5, 1);
+  const today = new Date();
+  const endDate = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
+  const startDate = endDate - (days - 1) * 24 * 60 * 60 * 1000;
 
   return Array.from({ length: days }, (_, index) => {
     const progress = index / Math.max(1, days - 1);

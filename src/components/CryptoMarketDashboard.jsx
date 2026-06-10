@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { Alert, Badge, Button, Container } from 'reactstrap'
-import cryptoDashboardData from '../data/cryptoDashboardData.js'
+import { getCryptoDashboardFallback } from '../data/cryptoDashboardData.js'
 import useRefreshCooldown from '../hooks/useRefreshCooldown.js'
 import { getMarketOutlook } from '../services/marketApi.js'
 import { getStoredTheme, storeTheme } from '../utils/themeStorage.js'
@@ -41,7 +41,7 @@ function CryptoMarketDashboard() {
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false)
   const [premiumAssetRequested, setPremiumAssetRequested] = useState('')
   const [dashboardData, setDashboardData] = useState({
-    ...cryptoDashboardData.BTC,
+    ...getCryptoDashboardFallback('BTC'),
     dataSource: 'fallback',
     lastUpdated: ''
   })
@@ -100,7 +100,7 @@ function CryptoMarketDashboard() {
       }
 
       return {
-        ...cryptoDashboardData[symbol],
+        ...getCryptoDashboardFallback(symbol),
         dataSource: 'fallback',
         lastUpdated: ''
       }
@@ -115,7 +115,7 @@ function CryptoMarketDashboard() {
     } catch (error) {
       if (requestId === requestIdRef.current) {
         setDashboardData({
-          ...cryptoDashboardData[symbol],
+          ...getCryptoDashboardFallback(symbol),
           dataSource: 'fallback',
           lastUpdated: new Date().toISOString()
         })

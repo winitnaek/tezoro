@@ -8,6 +8,7 @@ const { buildSignalConfidence } = require('../src/engine/signalConfidenceEngine'
 const { buildMarketSignal } = require('../src/engine/signalScoreEngine');
 const { buildTechnicalAnalysis } = require('../src/engine/technicalAnalysisEngine');
 const { buildTechnicalRating } = require('../src/engine/technicalRatingEngine');
+const { buildMarketOutlook } = require('../src/engine/outlookEngine');
 const fallbackMarketData = require('../src/data/fallbackMarketData');
 
 function buildChart(days = 120, start = 100) {
@@ -171,4 +172,33 @@ test('fallback market data includes AI decision brief for every supported asset'
     assert.ok(fallbackMarketData[symbol].aiDecisionBrief.marketStory);
     assert.ok(fallbackMarketData[symbol].aiDecisionBrief.suggestedApproach);
   });
+});
+
+test('fallback price history ends on the current UTC date', () => {
+  const today = new Date();
+  const expectedDate = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()))
+    .toISOString()
+    .slice(0, 10);
+  const series = fallbackMarketData.BTC.priceHistory.series['1Y'];
+
+  assert.equal(series.at(-1).date, expectedDate);
+});
+
+test('market outlook refreshes header dates on each request', async () => {
+  const outlook = await buildMarketOutlook('BTC');
+  const today = new Date();
+  const expectedSnapshotDate = new Intl.DateTimeFormat('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric'
+  }).format(today);
+  const expectedEndDate = new Intl.DateTimeFormat('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric'
+  }).format(new Date(today.getFullYear(), today.getMonth(), today.getDate() + 14));
+
+  assert.equal(outlook.snapshotDate, expectedSnapshotDate);
+  assert.equal(outlook.period.startDate, expectedSnapshotDate);
+  assert.equal(outlook.period.endDate, expectedEndDate);
 });

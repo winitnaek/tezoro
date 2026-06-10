@@ -22,6 +22,30 @@ function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
+function addDays(date, days) {
+  const nextDate = new Date(date);
+  nextDate.setDate(nextDate.getDate() + days);
+  return nextDate;
+}
+
+function formatDisplayDate(date) {
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric'
+  }).format(date);
+}
+
+function buildRollingPeriod(date = new Date()) {
+  return {
+    period: {
+      startDate: formatDisplayDate(date),
+      endDate: formatDisplayDate(addDays(date, 14))
+    },
+    snapshotDate: formatDisplayDate(date)
+  };
+}
+
 function formatUsdPrice(value) {
   if (!Number.isFinite(value)) {
     return '';
@@ -325,13 +349,18 @@ function enhanceOutlookWithIntelligence({
 }
 
 async function buildMarketOutlook(symbol) {
-  const fallback = applyPremiumDescription(applyFearGreedCategory(clone(fallbackMarketData[symbol])));
+  const baseFallback = fallbackMarketData[symbol];
 
-  if (!fallback) {
+  if (!baseFallback) {
     const error = new Error('Unsupported crypto symbol');
     error.statusCode = 400;
     throw error;
   }
+
+  const fallback = applyPremiumDescription(applyFearGreedCategory({
+    ...clone(baseFallback),
+    ...buildRollingPeriod()
+  }));
 
   fallback.dataSource = 'fallback';
   fallback.priceProvider = 'fallback';
