@@ -28,7 +28,7 @@ const premiumFeatureEnabled = import.meta.env.VITE_PREMIUM_FEATURE_ENABLED === '
 
 function CryptoMarketDashboard() {
   const [selectedCrypto, setSelectedCrypto] = useState('BTC')
-  const [theme, setTheme] = useState(() => getStoredTheme('dark'))
+  const [theme, setTheme] = useState(() => getStoredTheme('light'))
   const [viewMode, setViewMode] = useState(() => {
     const storedViewMode = getStoredViewMode('overview')
     if (premiumFeatureEnabled && storedViewMode === 'pro') {

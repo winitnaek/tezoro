@@ -1,7 +1,7 @@
 const THEME_STORAGE_KEY = 'tezoro-theme'
 const SUPPORTED_THEMES = ['dark', 'light', 'high-contrast']
 
-export function getStoredTheme(defaultTheme = 'dark') {
+export function getStoredTheme(defaultTheme = 'light') {
   if (typeof window === 'undefined') {
     return defaultTheme
   }
