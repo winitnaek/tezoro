@@ -142,10 +142,13 @@ test('frontend fallback chart dates are rolling, not fixed to an old seed date',
 test('SystemStatusCard renders diagnostics labels', async () => {
   const source = await readSource('src/components/SystemStatusCard.jsx')
 
-  assert.match(source, /Price Provider/)
-  assert.match(source, /Premium Provider/)
-  assert.match(source, /Sentiment Provider/)
-  assert.match(source, /Cache Status/)
+  assert.match(source, /Price Source/)
+  assert.match(source, /Premium Source/)
+  assert.match(source, /Sentiment Source/)
+  assert.match(source, /Data Freshness/)
+  assert.match(source, /hit: 'Recent'/)
+  assert.match(source, /miss: 'Live'/)
+  assert.match(source, /fallback: 'Fallback'/)
 })
 
 test('CryptoMarketDashboard refreshes fallback outlook dates when fallback data is used', async () => {

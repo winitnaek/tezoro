@@ -25,10 +25,40 @@ function formatPrice(value) {
   return `$${Math.round(value).toLocaleString('en-US')}`
 }
 
+function formatPercent(value) {
+  if (!Number.isFinite(value)) {
+    return '-'
+  }
+
+  const sign = value > 0 ? '+' : ''
+  return `${sign}${value.toFixed(2)}%`
+}
+
+function calculatePeriodReturn(series) {
+  const validPrices = series
+    .map((point) => Number(point.price))
+    .filter((price) => Number.isFinite(price) && price > 0)
+
+  if (validPrices.length < 2) {
+    return null
+  }
+
+  const firstPrice = validPrices[0]
+  const lastPrice = validPrices[validPrices.length - 1]
+
+  return ((lastPrice - firstPrice) / firstPrice) * 100
+}
+
 function PriceHistoryChart({ priceHistory, symbol }) {
   const ranges = priceHistory?.ranges || ['7D', '30D', '90D', '1Y']
   const [selectedRange, setSelectedRange] = useState(priceHistory?.defaultRange || '30D')
   const chartData = useMemo(() => priceHistory?.series?.[selectedRange] || [], [priceHistory, selectedRange])
+  const periodReturn = useMemo(() => calculatePeriodReturn(chartData), [chartData])
+  const periodReturnClass = periodReturn > 0
+    ? 'period-return-positive'
+    : periodReturn < 0
+      ? 'period-return-negative'
+      : 'period-return-neutral'
 
   if (!priceHistory) {
     return null
@@ -42,17 +72,22 @@ function PriceHistoryChart({ priceHistory, symbol }) {
             <div className="snapshot-label">{symbol} Price History</div>
             <p className="mb-0">Historical analytics are informational only.</p>
           </div>
-          <div className="price-range-controls" aria-label="Price history range">
-            {ranges.map((range) => (
-              <button
-                key={range}
-                type="button"
-                className={`price-range-btn ${selectedRange === range ? 'price-range-btn-active' : ''}`}
-                onClick={() => setSelectedRange(range)}
-              >
-                {range}
-              </button>
-            ))}
+          <div className="price-history-actions">
+            <div className={`period-return-pill ${periodReturnClass}`}>
+              {selectedRange} Return: {formatPercent(periodReturn)}
+            </div>
+            <div className="price-range-controls" aria-label="Price history range">
+              {ranges.map((range) => (
+                <button
+                  key={range}
+                  type="button"
+                  className={`price-range-btn ${selectedRange === range ? 'price-range-btn-active' : ''}`}
+                  onClick={() => setSelectedRange(range)}
+                >
+                  {range}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 

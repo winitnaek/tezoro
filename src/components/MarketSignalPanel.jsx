@@ -3,7 +3,27 @@ function formatDiagnostic(value) {
     return 'Unavailable'
   }
 
-  return String(value)
+  const normalized = String(value).toLowerCase()
+  const displayValues = {
+    'alternative-me': 'Alternative.me',
+    coinmarketcap: 'CoinMarketCap',
+    coingecko: 'CoinGecko',
+    coinbase: 'Coinbase',
+    fallback: 'Fallback',
+  }
+
+  return displayValues[normalized] || String(value)
+}
+
+function formatFreshness(value) {
+  const normalized = String(value || '').toLowerCase()
+  const displayValues = {
+    hit: 'Recent',
+    miss: 'Live',
+    fallback: 'Fallback',
+  }
+
+  return displayValues[normalized] || formatDiagnostic(value)
 }
 
 function MarketSignalPanel({ marketSignal, signalConfidence, providerDiagnostics }) {
@@ -51,20 +71,20 @@ function MarketSignalPanel({ marketSignal, signalConfidence, providerDiagnostics
           <div className="dq-title">Data Quality</div>
           <div className="dq-grid">
             <div className="dq-row">
-              <span>Price</span>
+              <span>Price Source</span>
               <span className="quality-badge">{formatDiagnostic(providerDiagnostics.price)}</span>
             </div>
             <div className="dq-row">
-              <span>Premium</span>
+              <span>Premium Source</span>
               <span className="quality-badge">{formatDiagnostic(providerDiagnostics.premium)}</span>
             </div>
             <div className="dq-row">
-              <span>Sentiment</span>
+              <span>Sentiment Source</span>
               <span className="quality-badge">{formatDiagnostic(providerDiagnostics.sentiment)}</span>
             </div>
             <div className="dq-row">
-              <span>Cache</span>
-              <span className="quality-badge">{formatDiagnostic(providerDiagnostics.cache)}</span>
+              <span>Data Freshness</span>
+              <span className="quality-badge">{formatFreshness(providerDiagnostics.cache)}</span>
             </div>
           </div>
         </div>

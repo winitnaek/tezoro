@@ -5,7 +5,27 @@ function formatValue(value) {
     return 'Unavailable'
   }
 
-  return String(value)
+  const normalized = String(value).toLowerCase()
+  const displayValues = {
+    'alternative-me': 'Alternative.me',
+    coinmarketcap: 'CoinMarketCap',
+    coingecko: 'CoinGecko',
+    coinbase: 'Coinbase',
+    fallback: 'Fallback',
+  }
+
+  return displayValues[normalized] || String(value)
+}
+
+function formatFreshness(value) {
+  const normalized = String(value || '').toLowerCase()
+  const displayValues = {
+    hit: 'Recent',
+    miss: 'Live',
+    fallback: 'Fallback',
+  }
+
+  return displayValues[normalized] || formatValue(value)
 }
 
 function SystemStatusCard({ providerDiagnostics }) {
@@ -14,10 +34,10 @@ function SystemStatusCard({ providerDiagnostics }) {
   }
 
   const rows = [
-    { label: 'Price Provider', value: providerDiagnostics.price },
-    { label: 'Premium Provider', value: providerDiagnostics.premium },
-    { label: 'Sentiment Provider', value: providerDiagnostics.sentiment },
-    { label: 'Cache Status', value: providerDiagnostics.cache === 'hit' ? 'Healthy' : providerDiagnostics.cache },
+    { label: 'Price Source', value: providerDiagnostics.price },
+    { label: 'Premium Source', value: providerDiagnostics.premium },
+    { label: 'Sentiment Source', value: providerDiagnostics.sentiment },
+    { label: 'Data Freshness', value: formatFreshness(providerDiagnostics.cache) },
   ]
 
   return (
